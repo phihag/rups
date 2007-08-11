@@ -36,6 +36,7 @@ import com.lowagie.text.pdf.PdfArray;
 import com.lowagie.text.pdf.PdfDictionary;
 import com.lowagie.text.pdf.PdfIndirectReference;
 import com.lowagie.text.pdf.PdfName;
+import com.lowagie.text.pdf.PdfNull;
 import com.lowagie.text.pdf.PdfObject;
 
 /**
@@ -56,12 +57,9 @@ public class TreeNodeFactory {
 	public TreeNodeFactory(IndirectObjectStore objectStore) {
 		this.objects = objectStore;
 		for (int i = 0; i < objects.size(); i++) {
-			nodes.add(new PdfObjectTreeNode(
-					objects.getObjectByIndex(i),
-					objects.getRefByIndex(i)));
-		}
-		for (Iterator it = nodes.iterator(); it.hasNext(); ) {
-			expandNode((PdfObjectTreeNode) it.next());
+		//	PdfObject object = objects.getObjectByIndex(i);
+			int ref = objects.getRefByIndex(i);
+			nodes.add(new PdfObjectTreeNode(PdfNull.PDFNULL, ref));
 		}
 	}
 	
@@ -71,7 +69,13 @@ public class TreeNodeFactory {
 	 * @return	the TreeNode representing the PDF object
 	 */
 	public PdfObjectTreeNode getNode(int ref) {
-		return nodes.get(objects.getIndexByRef(ref));
+		int idx = objects.getIndexByRef(ref);
+		PdfObjectTreeNode node = nodes.get(idx);
+		if (node.getPdfObject().isNull()) {
+			node = new PdfObjectTreeNode(objects.loadObjectByReference(ref), ref);
+			nodes.set(idx, node);
+		}
+		return node;
 	}
 	
 	/**
@@ -86,7 +90,8 @@ public class TreeNodeFactory {
 		switch (object.type()) {
 		case PdfObject.INDIRECT:
 			PdfIndirectReference ref = (PdfIndirectReference)object;
-			addNodes(node, getNode(ref.getNumber()));
+			leaf = getNode(ref.getNumber());
+			addNodes(node, leaf);
 			return;
 		case PdfObject.ARRAY:
 			PdfArray array = (PdfArray)object;

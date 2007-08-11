@@ -29,6 +29,7 @@ package com.lowagie.rups.factories;
 import java.util.ArrayList;
 
 import com.lowagie.text.pdf.IntHashtable;
+import com.lowagie.text.pdf.PdfNull;
 import com.lowagie.text.pdf.PdfObject;
 import com.lowagie.text.pdf.PdfReader;
 
@@ -37,6 +38,8 @@ import com.lowagie.text.pdf.PdfReader;
  */
 public class IndirectObjectStore {
 
+	/** The reader object. */
+	protected PdfReader reader;
 	/** A list of all the indirect objects in a PDF file. */
 	protected ArrayList<PdfObject> objects = new ArrayList<PdfObject>();
 	/** Mapping between the index in the objects list and the reference number in the xref table.  */
@@ -47,14 +50,14 @@ public class IndirectObjectStore {
 	/** Creates a list containing all the indirect objects in a PDF document. */
 	public IndirectObjectStore(PdfReader reader) {
 		int n = reader.getXrefSize();
-		PdfObject object;
 		int idx = 0;
+		this.reader = reader;
 		for (int ref = 0; ref < n; ref++) {
-			object = reader.getPdfObjectRelease(ref);
+			PdfObject object = reader.getPdfObjectRelease(ref);
 			if (object != null) {
 				idxToRef.put(idx, ref);
 				refToIdx.put(ref, idx);
-				objects.add(object);
+				objects.add(PdfNull.PDFNULL);
 				idx++;
 			}
 		}
@@ -98,10 +101,23 @@ public class IndirectObjectStore {
 
 	/**
 	 * Gets an object based on its reference number in the xref table.
-	 * @param ref	a reference number in the xref table.
-	 * @return	a PDF object
 	 */
 	public PdfObject getObjectByReference(int ref) {
 		return objects.get(getIndexByRef(ref));
+	}
+	
+	/**
+	 * Loads an object based on its reference number in the xref table.
+	 * @param ref	a reference number in the xref table.
+	 * @return	a PDF object
+	 */
+	public PdfObject loadObjectByReference(int ref) {
+		PdfObject object = getObjectByReference(ref);
+		if (object instanceof PdfNull) {
+			int idx = getIndexByRef(ref);
+			object = reader.getPdfObject(ref);
+			objects.set(idx, object);
+		}
+		return object;
 	}
 }

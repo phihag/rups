@@ -32,6 +32,7 @@ import javax.swing.table.TableColumn;
 
 import com.lowagie.rups.factories.IndirectObjectStore;
 import com.lowagie.rups.interfaces.PdfObjectRenderer;
+import com.lowagie.text.pdf.PdfNull;
 import com.lowagie.text.pdf.PdfObject;
 
 /**
@@ -71,35 +72,6 @@ public class XRefTable extends JTable {
 	}
 	
 	/**
-	 * Gets the reference number of an indirect object
-	 * based on the row index.
-	 * @param rowIndex	a row number
-	 * @return	a reference number
-	 */
-	public int getRefByRowNumber(int rowIndex) {
-		return store.getRefByIndex(rowIndex);
-	}
-	
-	/**
-	 * Gets the object that is shown in a row.
-	 * @param rowIndex	the row number containing the object
-	 * @return	a PDF object
-	 */
-	public PdfObject getObjectByRow(int rowIndex) {
-		return store.getObjectByIndex(rowIndex);
-	}
-	
-	/**
-	 * Selects a row containing information about an indirect object.
-	 * @param ref	the reference number of the indirect object
-	 */
-	public void selectRowByReference(int ref) {
-		int row = store.getIndexByRef(ref);
-		setRowSelectionInterval(row, row);
-		valueChanged(null);
-	}
-	
-	/**
 	 * @see javax.swing.JTable#getColumnCount()
 	 */
 	public int getColumnCount() {
@@ -120,14 +92,35 @@ public class XRefTable extends JTable {
     public Object getValueAt(int rowIndex, int columnIndex) {
 		switch (columnIndex) {
 		case 0:
-			return getRefByRowNumber(rowIndex);
+			return getObjectReferenceByRow(rowIndex);
 		case 1:
-			return getObjectByRow(rowIndex);
+			return getObjectDescriptionByRow(rowIndex);
 		default:
 			return null;
 		}
 	}
-
+	
+	/**
+	 * Gets the reference number of an indirect object
+	 * based on the row index.
+	 * @param rowIndex	a row number
+	 * @return	a reference number
+	 */
+	protected int getObjectReferenceByRow(int rowIndex) {
+		return store.getRefByIndex(rowIndex);
+	}
+	
+	/**
+	 * Gets the object that is shown in a row.
+	 * @param rowIndex	the row number containing the object
+	 * @return	a PDF object
+	 */
+	protected String getObjectDescriptionByRow(int rowIndex) {
+		PdfObject object = store.getObjectByIndex(rowIndex);
+		if (object instanceof PdfNull)
+			return "Indirect object";
+		return object.toString();
+	}
 	/**
 	 * @see javax.swing.JTable#getColumnName(int)
 	 */
@@ -151,5 +144,24 @@ public class XRefTable extends JTable {
 			super.valueChanged(evt);
 		if (renderer != null)
 			renderer.render(getObjectByRow(this.getSelectedRow()));
+	}
+	
+	/**
+	 * Gets the object that is shown in a row.
+	 * @param rowIndex	the row number containing the object
+	 * @return	a PDF object
+	 */
+	protected PdfObject getObjectByRow(int rowIndex) {
+		return store.loadObjectByReference(getObjectReferenceByRow(rowIndex));
+	}
+	
+	/**
+	 * Selects a row containing information about an indirect object.
+	 * @param ref	the reference number of the indirect object
+	 */
+	public void selectRowByReference(int ref) {
+		int row = store.getIndexByRef(ref);
+		setRowSelectionInterval(row, row);
+		valueChanged(null);
 	}
 }

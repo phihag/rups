@@ -1,5 +1,4 @@
 /*
- * $Id: AbstractTool.java 49 2007-05-19 19:24:42Z chammer $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -66,13 +65,15 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 
 	/** The reader object for this PDF file. */
 	protected PdfReader reader = null;
+	/** The factory that generates the tree nodes. */
+	protected TreeNodeFactory factory;
 
 	/** The table that will show info about the PDFs Crossreference table. */
-	XRefTable xrefTable = new XRefTable();
+	protected XRefTable xrefTable = new XRefTable();
 	/** The tree that will reveal the internal PDF structure.  */
-	PdfTree pdfTree = new PdfTree();
+	protected PdfTree pdfTree = new PdfTree();
 	/** The panel that will contain info about a PDF object (card layout). */
-	PdfObjectPanel object_panel = new PdfObjectPanel();
+	protected PdfObjectPanel object_panel = new PdfObjectPanel();
 
 	/** The action to open a file chooser. */
 	FileChooserAction file_chooser_action;
@@ -148,7 +149,7 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 		try {
 			reader = new PdfReader(new RandomAccessFileOrArray(file.getAbsolutePath()), null);
 			IndirectObjectStore objects = new IndirectObjectStore(reader);
-			TreeNodeFactory factory = new TreeNodeFactory(objects);
+			factory = new TreeNodeFactory(objects);
 			xrefTable.setObjects(objects);
 			xrefTable.setRenderer(object_panel);
 			pdfTree.resetRoot(file, factory, reader.getTrailer());
@@ -182,7 +183,11 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 		}
 		else if (selectednode instanceof PdfObjectTreeNode) {
 			PdfObjectTreeNode node = (PdfObjectTreeNode)selectednode;
-			if (node.isIndirect()) {
+			factory.expandNode(node);
+			if (node.isRecursiveReference()) {
+				pdfTree.setSelectionPath(node.getAncestor());
+			}
+			else if (node.isIndirect()) {
 				xrefTable.selectRowByReference(node.getNumber());
 			}
 			else {

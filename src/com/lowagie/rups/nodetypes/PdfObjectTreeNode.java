@@ -29,6 +29,7 @@ package com.lowagie.rups.nodetypes;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 import com.lowagie.text.pdf.PdfDictionary;
 import com.lowagie.text.pdf.PdfIndirectReference;
@@ -96,11 +97,27 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
 	}
 	
 	/**
+	 * Tells you if the node contains an indirect reference.
+	 * @return	true if the object is an indirect reference
+	 */
+	public boolean isIndirectReference() {
+		return object.type() == PdfObject.INDIRECT;
+	}
+	
+	/**
 	 * Tells you if the object is indirect.
 	 * @return	true for indirect objects; false for direct objects.
 	 */
 	public boolean isIndirect() {
-		return object.type() == PdfObject.INDIRECT || number > -1;
+		return isIndirectReference() || number > -1;
+	}
+	
+	/**
+	 * Tells you if the object is a reference to a node higher up in the tree.
+	 * @return	true if the node is used recursively.
+	 */
+	public boolean isRecursiveReference() {
+		return isIndirectReference() && getChildCount() == 0;
 	}
 
 	/**
@@ -108,7 +125,7 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
 	 * @return	-1 for direct objects; the object number for indirect objects
 	 */
 	public int getNumber() {
-		if (object.type() == PdfObject.INDIRECT) {
+		if (isIndirectReference()) {
 			return ((PdfIndirectReference)object).getNumber();
 		}
 		return number;
@@ -186,5 +203,23 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
 		buf.append(": ");
 		buf.append(dict.get(key).toString());
 		return buf.toString();
+	}
+
+	/**
+	 * Gets the tree path of an ancestor.
+	 * This only works with recursive references
+	 * @return	the treepath to an ancestor
+	 */
+	public TreePath getAncestor() {
+		if (isRecursiveReference()) {
+			PdfObjectTreeNode node = this;
+			while(true) {
+				node = (PdfObjectTreeNode)node.getParent();
+				if (node.isIndirectReference() && node.getNumber() == getNumber()) {
+					return new TreePath(node.getPath());
+				}
+			}
+		}
+		return null;
 	}
 }
