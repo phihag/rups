@@ -51,7 +51,6 @@ public class PdfObjectPanel extends JPanel implements PdfObjectRenderer {
 	/** The layout that will show the info about the PDF object that is being analyzed. */
 	protected CardLayout layout = new CardLayout();
 
-	
 	/** Label that shows a value. */
 	JLabel value_rendering = new JLabel();
 	/** Table with dictionary entries. */
@@ -84,6 +83,13 @@ public class PdfObjectPanel extends JPanel implements PdfObjectRenderer {
 		JScrollPane text_scrollpane = new JScrollPane();
 		text_scrollpane.setViewportView(stream_rendering);
 		add(text_scrollpane, "stream");
+	}
+	
+	/**
+	 * Clear ths object panel.
+	 */
+	public void clear() {
+		layout.show(this, "empty");
 	}
 	
 	/**

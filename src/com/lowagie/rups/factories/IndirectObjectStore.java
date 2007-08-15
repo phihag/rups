@@ -40,6 +40,10 @@ public class IndirectObjectStore {
 
 	/** The reader object. */
 	protected PdfReader reader;
+	/** The current xref number. */
+	protected int current;
+	/** The highest xref number. */
+	protected int n;
 	/** A list of all the indirect objects in a PDF file. */
 	protected ArrayList<PdfObject> objects = new ArrayList<PdfObject>();
 	/** Mapping between the index in the objects list and the reference number in the xref table.  */
@@ -47,24 +51,60 @@ public class IndirectObjectStore {
 	/** Mapping between the reference number in the xref table and the index in the objects list .  */
 	protected IntHashtable refToIdx = new IntHashtable();
 	
-	/** Creates a list containing all the indirect objects in a PDF document. */
+	/**
+	 * Creates a list that will contain all the indirect objects
+	 * in a PDF document. 
+	 * @param reader	the reader that will read the PDF document
+	 */
 	public IndirectObjectStore(PdfReader reader) {
-		int n = reader.getXrefSize();
-		int idx = 0;
 		this.reader = reader;
-		for (int ref = 0; ref < n; ref++) {
-			PdfObject object = reader.getPdfObjectRelease(ref);
+		current = -1;
+		n = reader.getXrefSize();
+	}
+
+	/**
+	 * Gets the last object that has been registered.
+	 * This method only makes sense while loading the store
+	 * with loadNextObject().
+	 * @return	the number of the last object that was stored
+	 */
+	public int getCurrent() {
+		return current;
+	}
+
+	/**
+	 * Gets the highest possible object number in the XRef table.
+	 * @return	an object number
+	 */
+	public int getXRefMaximum() {
+		return n;
+	}
+
+	/**
+	 * Registers the next object of the XRef table in the store.
+	 * As soon as this method returns false, it makes no sense
+	 * calling it as all the objects have been registered.
+	 * @return	false if there are no objects left to check.
+	 */
+	public boolean registerNextObject() {
+		while (current < n) {
+			current++;
+			PdfObject object = reader.getPdfObjectRelease(current);
 			if (object != null) {
-				idxToRef.put(idx, ref);
-				refToIdx.put(ref, idx);
+				int idx = size();
+				idxToRef.put(idx, current);
+				refToIdx.put(current, idx);
 				objects.add(PdfNull.PDFNULL);
-				idx++;
+				return true;
 			}
 		}
+		return false;
 	}
 	
 	/**
-	 * Gets the number of indirect objects in the PDF file.
+	 * Gets the total number of indirect objects in the PDF file.
+	 * This isn't necessarily the same number as returned by getXRefMaximum().
+	 * The PDF specification allows gaps between object numbers.
 	 * @return the total number of indirect objects in the PDF.
 	 */
 	public int size() {

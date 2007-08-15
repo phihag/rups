@@ -58,9 +58,15 @@ public class XRefTable extends JTable {
 	 */
 	public void setObjects(IndirectObjectStore store) {
 		this.store = store;
-		setModel(new XRefTableModel(this));
-		TableColumn col= getColumnModel().getColumn(0);
-		col.setPreferredWidth(5);
+		if (store == null) {
+			renderer = null;
+			repaint();
+		}
+		else {
+			setModel(new XRefTableModel(this));
+			TableColumn col= getColumnModel().getColumn(0);
+			col.setPreferredWidth(5);
+		}
 	}
 	
 	/**

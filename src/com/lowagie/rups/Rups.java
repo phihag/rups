@@ -42,18 +42,19 @@ import javax.swing.JSplitPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
-import com.lowagie.swing.browse.BrowseResult;
-import com.lowagie.swing.browse.FileChooserAction;
-import com.lowagie.swing.browse.filters.PdfFilter;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.RandomAccessFileOrArray;
-import com.lowagie.rups.factories.TreeNodeFactory;
 import com.lowagie.rups.factories.IndirectObjectStore;
+import com.lowagie.rups.factories.PdfWorker;
+import com.lowagie.rups.factories.TreeNodeFactory;
 import com.lowagie.rups.helpers.PdfObjectPanel;
 import com.lowagie.rups.helpers.PdfTree;
 import com.lowagie.rups.helpers.XRefTable;
 import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
 import com.lowagie.rups.nodetypes.PdfTrailerTreeNode;
+import com.lowagie.swing.browse.BrowseResult;
+import com.lowagie.swing.browse.FileChooserAction;
+import com.lowagie.swing.browse.filters.PdfFilter;
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.RandomAccessFileOrArray;
 
 /**
  * An application that allows you to inspect the syntax of a PDF file.
@@ -67,16 +68,14 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 	protected PdfReader reader = null;
 	/** The factory that generates the tree nodes. */
 	protected TreeNodeFactory factory;
-
 	/** The table that will show info about the PDFs Crossreference table. */
 	protected XRefTable xrefTable = new XRefTable();
 	/** The tree that will reveal the internal PDF structure.  */
 	protected PdfTree pdfTree = new PdfTree();
 	/** The panel that will contain info about a PDF object (card layout). */
-	protected PdfObjectPanel object_panel = new PdfObjectPanel();
-
+	protected PdfObjectPanel objectPanel = new PdfObjectPanel();
 	/** The action to open a file chooser. */
-	FileChooserAction file_chooser_action;
+	protected FileChooserAction fileChooserAction;
 	
 	/**
 	 * Main method of this application.
@@ -91,8 +90,9 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 	 */
 	public Rups() {
         super();
-        initialize();
+		fileChooserAction = new FileChooserAction(this, "Open", PdfFilter.INSTANCE, false);
 		pdfTree.addTreeSelectionListener(this);
+        initialize();
 		setVisible(true);
 	}
 	
@@ -101,8 +101,6 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
      */
     private void initialize() {
 
-        file_chooser_action = new FileChooserAction(this, "Open", PdfFilter.INSTANCE, false);
-        
         // size and location
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         setSize((int)(screen.getWidth() * .75), (int)(screen.getHeight() * .75));
@@ -119,7 +117,7 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 		main_splitpane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		main_splitpane.setDividerLocation((int)(screen.getHeight() * .5));
 		this.getContentPane().add(main_splitpane, java.awt.BorderLayout.CENTER);
-		main_splitpane.add(object_panel, JSplitPane.BOTTOM);
+		main_splitpane.add(objectPanel, JSplitPane.BOTTOM);
 		
 		JPanel top_panel = new JPanel();
 		top_panel.setLayout(new BorderLayout());
@@ -139,24 +137,6 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 		xref_panel.add(xref_scrollpane, java.awt.BorderLayout.CENTER);
 		top_splitpane.add(xref_panel, JSplitPane.TOP);
 		top_panel.add(top_splitpane, BorderLayout.CENTER);
-
-	}
-	
-	/**
-	 * @see com.lowagie.swing.browse.BrowseResult#setFile(java.io.File)
-	 */
-	public void setFile(File file) {
-		try {
-			reader = new PdfReader(new RandomAccessFileOrArray(file.getAbsolutePath()), null);
-			IndirectObjectStore objects = new IndirectObjectStore(reader);
-			factory = new TreeNodeFactory(objects);
-			xrefTable.setObjects(objects);
-			xrefTable.setRenderer(object_panel);
-			pdfTree.resetRoot(file, factory, reader.getTrailer());
-		} catch (IOException e) {
-			reader = null;
-			JOptionPane.showMessageDialog(this, e.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-		}
 	}
 	
 	/**
@@ -167,19 +147,50 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 		JMenuBar bar = new JMenuBar();
         JMenu file = new JMenu("File");
         JMenuItem open = new JMenuItem("Open");
-        open.setAction(file_chooser_action);
+        open.setAction(fileChooserAction);
         file.add(open);
         bar.add(file);
 		return bar;
 	}
 
 	/**
+	 * @see com.lowagie.swing.browse.BrowseResult#setFile(java.io.File)
+	 */
+	public void setFile(File file) {
+		try {
+			objectPanel.clear();
+			pdfTree.resetRoot(file);
+			xrefTable.setObjects(null);
+			reader = new PdfReader(new RandomAccessFileOrArray(file.getAbsolutePath()), null);
+			if (!PdfWorker.loadPdf(this, reader)) {
+				JOptionPane.showMessageDialog(this, "Currently loading another PDF document.\nYou can only load one PDF at a time.", "Dialog", JOptionPane.WARNING_MESSAGE);
+			}
+		} catch (IOException e) {
+			reader = null;
+			JOptionPane.showMessageDialog(this, e.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	/**
+	 * Updates the components of the Rups application
+	 * because a new PDF document was loaded into an
+	 * indirect object store.
+	 * @param	objects	the indirect object store
+	 */
+	public void update(IndirectObjectStore objects) {
+		factory = new TreeNodeFactory(objects);
+		xrefTable.setObjects(objects);
+		xrefTable.setRenderer(objectPanel);
+		pdfTree.resetRoot(factory, reader.getTrailer());
+	}
+	
+	/**
 	 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
 	 */
 	public void valueChanged(TreeSelectionEvent e) {
 		Object selectednode = pdfTree.getLastSelectedPathComponent();
 		if (selectednode instanceof PdfTrailerTreeNode) {
-			file_chooser_action.actionPerformed(null);
+			fileChooserAction.actionPerformed(null);
 		}
 		else if (selectednode instanceof PdfObjectTreeNode) {
 			PdfObjectTreeNode node = (PdfObjectTreeNode)selectednode;
@@ -191,9 +202,8 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 				xrefTable.selectRowByReference(node.getNumber());
 			}
 			else {
-				object_panel.render(node.getPdfObject());
+				objectPanel.render(node.getPdfObject());
 			}
 		}
-		
 	}
 }

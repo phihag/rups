@@ -26,7 +26,6 @@
 
 package com.lowagie.swing.browse;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -66,19 +65,19 @@ public class FileChooserAction extends AbstractAction {
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent evt) {
-		if (result instanceof Component) {
-			JFileChooser fc = new JFileChooser();
-			if (filter != null) {
-				fc.setFileFilter(filter);
-			}
-			if (newFile) {
-				fc.showSaveDialog((Component)result);
-			}
-			else {
-				fc.showOpenDialog((Component)result);
-			}
-			result.setFile(fc.getSelectedFile());
+		JFileChooser fc = new JFileChooser();
+		if (filter != null) {
+			fc.setFileFilter(filter);
 		}
+		int okCancel;
+		if (newFile) {
+			okCancel = fc.showSaveDialog(null);
+		}
+		else {
+			okCancel = fc.showOpenDialog(null);
+		}
+		if (okCancel == JFileChooser.APPROVE_OPTION)
+			result.setFile(fc.getSelectedFile());
 	}
 
 }

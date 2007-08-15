@@ -53,11 +53,19 @@ public class PdfTree extends JTree {
 	}
 	
 	/**
-	 * Sets or resets the root of this PDF tree.
+	 * Sets or resets the user object of the root.
 	 */
-	public void resetRoot(File file, TreeNodeFactory factory, PdfDictionary trailer) {
+	public void resetRoot(File file) {
 		root = new PdfTrailerTreeNode();
 		root.setUserObject(file);
+		setModel(new DefaultTreeModel(root));
+		repaint();
+	}
+	
+	/**
+	 * Sets or resets the root of this PDF tree.
+	 */
+	public void resetRoot(TreeNodeFactory factory, PdfDictionary trailer) {
 		root.setTrailer(trailer);
 		factory.expandNode(root);
 		setModel(new DefaultTreeModel(root));
