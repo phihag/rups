@@ -1,4 +1,5 @@
 /*
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -39,12 +40,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
 import com.lowagie.rups.factories.IndirectObjectStore;
 import com.lowagie.rups.factories.PdfWorker;
 import com.lowagie.rups.factories.TreeNodeFactory;
+import com.lowagie.rups.helpers.OutlineTree;
+import com.lowagie.rups.helpers.PagesTable;
 import com.lowagie.rups.helpers.PdfObjectPanel;
 import com.lowagie.rups.helpers.PdfTree;
 import com.lowagie.rups.helpers.XRefTable;
@@ -53,6 +57,7 @@ import com.lowagie.rups.nodetypes.PdfTrailerTreeNode;
 import com.lowagie.swing.browse.BrowseResult;
 import com.lowagie.swing.browse.FileChooserAction;
 import com.lowagie.swing.browse.filters.PdfFilter;
+import com.lowagie.text.pdf.PdfPageLabels;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.RandomAccessFileOrArray;
 
@@ -72,6 +77,10 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 	protected XRefTable xrefTable = new XRefTable();
 	/** The tree that will reveal the internal PDF structure.  */
 	protected PdfTree pdfTree = new PdfTree();
+	/** The table that will show info about the pages. */
+	protected PagesTable pages = new PagesTable();
+	/** The outlines tree. */
+	protected OutlineTree outlines = new OutlineTree();
 	/** The panel that will contain info about a PDF object (card layout). */
 	protected PdfObjectPanel objectPanel = new PdfObjectPanel();
 	/** The action to open a file chooser. */
@@ -130,12 +139,17 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 		tree_scrollpane.setViewportView(pdfTree);
 		top_splitpane.add(tree_scrollpane, JSplitPane.BOTTOM);
 		
-		JPanel xref_panel = new JPanel();
-		xref_panel.setLayout(new BorderLayout());
+		JTabbedPane info_panel = new JTabbedPane();
+		JScrollPane pages_scrollpane = new JScrollPane();
+		pages_scrollpane.setViewportView(pages);
+		info_panel.addTab("Pages", null, pages_scrollpane, "Pages");
+		JScrollPane outlines_scrollpane = new JScrollPane();
+		outlines_scrollpane.setViewportView(outlines);
+		info_panel.addTab("Outlines", outlines_scrollpane);
 		JScrollPane xref_scrollpane = new JScrollPane();
 		xref_scrollpane.setViewportView(xrefTable);
-		xref_panel.add(xref_scrollpane, java.awt.BorderLayout.CENTER);
-		top_splitpane.add(xref_panel, JSplitPane.TOP);
+		info_panel.addTab("XRef", null, xref_scrollpane, "Cross-reference table");
+		top_splitpane.add(info_panel, JSplitPane.TOP);
 		top_panel.add(top_splitpane, BorderLayout.CENTER);
 	}
 	
@@ -159,11 +173,15 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 	public void setFile(File file) {
 		try {
 			objectPanel.clear();
-			pdfTree.resetRoot(file);
 			xrefTable.setObjects(null);
+			pages.loadPages(null, null);
+			outlines.loadOutlines(null, null);
 			reader = new PdfReader(new RandomAccessFileOrArray(file.getAbsolutePath()), null);
 			if (!PdfWorker.loadPdf(this, reader)) {
 				JOptionPane.showMessageDialog(this, "Currently loading another PDF document.\nYou can only load one PDF at a time.", "Dialog", JOptionPane.WARNING_MESSAGE);
+			}
+			else {
+				pdfTree.resetRoot(file);
 			}
 		} catch (IOException e) {
 			reader = null;
@@ -182,6 +200,8 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 		xrefTable.setObjects(objects);
 		xrefTable.setRenderer(objectPanel);
 		pdfTree.resetRoot(factory, reader.getTrailer());
+		pages.loadPages(pdfTree, PdfPageLabels.getPageLabels(reader));
+		outlines.loadOutlines(factory, pdfTree);
 	}
 	
 	/**
@@ -195,8 +215,8 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 		else if (selectednode instanceof PdfObjectTreeNode) {
 			PdfObjectTreeNode node = (PdfObjectTreeNode)selectednode;
 			factory.expandNode(node);
-			if (node.isRecursiveReference()) {
-				pdfTree.setSelectionPath(node.getAncestor());
+			if (node.isRecursive()) {
+				pdfTree.selectNode(node.getAncestor());
 			}
 			else if (node.isIndirect()) {
 				xrefTable.selectRowByReference(node.getNumber());

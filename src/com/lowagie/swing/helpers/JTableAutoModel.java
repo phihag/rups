@@ -24,66 +24,61 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.rups.helpers;
+package com.lowagie.swing.helpers;
 
 import javax.swing.table.AbstractTableModel;
 
-import com.lowagie.text.pdf.PdfArray;
-
 /**
- * A TableModel in case we want to show a PDF array in a JTable.
+ * A reusable TableModel class for tables that implement the
+ * JTableAutoModelInterface.
  */
-public class PdfArrayTableModel extends AbstractTableModel {
+public class JTableAutoModel extends AbstractTableModel {
 	
-	/** A serial version UID. */
-	private static final long serialVersionUID = 4665485782853993708L;
-	/** The PDF array. */
-	protected PdfArray array;
+	/** The serial version uid. */
+	private static final long serialVersionUID = -2229431581745521537L;
+	/** The table that knows how to model itself. */
+	protected JTableAutoModelInterface table;
 
 	/**
-	 * Creates the TableModel.
-	 * @param array a PDF array
+	 * Constructs an auto model for a JTable.
+	 * @param	table	a JTable that knows information about its model.
 	 */
-	public PdfArrayTableModel(PdfArray array) {
-		this.array = array;
+	public JTableAutoModel(JTableAutoModelInterface table) {
+		this.table = table;
 	}
 	
-	/**
-	 * @see javax.swing.table.TableModel#getColumnCount()
-	 */
-	public int getColumnCount() {
-		return 1;
+    /**
+     * @see javax.swing.table.TableModel#getColumnCount()
+     * @return int the number of columns
+     */
+    public int getColumnCount() {
+		return table.getColumnCount();
 	}
 
-	/**
-	 * @see javax.swing.table.TableModel#getRowCount()
-	 */
-	public int getRowCount() {
-		return array.size();
-	}
-
-	/**
-	 * @see javax.swing.table.TableModel#getValueAt(int, int)
-	 */
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		switch (columnIndex) {
-		case 0:
-			return array.getPdfObject(rowIndex);
-		default:
-			return null;
-		}
+    /**
+     * @see javax.swing.table.TableModel#getRowCount()
+     * @return int the number of rows
+     */
+    public int getRowCount() {
+		return table.getRowCount();
 	}
 
 	/**
 	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+	 * @param columnIndex a column number.
+	 * @return the name of the column
 	 */
 	public String getColumnName(int columnIndex) {
-		switch (columnIndex) {
-		case 0:
-			return "Array";
-		default:
-			return null;
-		}
+		return table.getColumnName(columnIndex);
 	}
 
+    /**
+     * @see javax.swing.table.TableModel#getValueAt(int, int)
+     * @param rowIndex int		a row number
+     * @param columnIndex int	a column number
+     * @return Object	an object corresponding with a cell in the table
+     */
+    public Object getValueAt(int rowIndex, int columnIndex) {
+    	return table.getValueAt(rowIndex, columnIndex);
+	}
 }

@@ -1,6 +1,6 @@
 /*
- * $Id: ObjectTreeNode.java 64 2007-06-10 11:13:04Z chammer $
- * Copyright (c) 2005-2007 Carsten Hammer, Bruno Lowagie
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
+ * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -44,7 +44,8 @@ public class PdfTrailerTreeNode extends PdfObjectTreeNode {
      * Constructs a simple text tree node.
      */
     public PdfTrailerTreeNode() {
-		super("Open a document", null);
+		super(null);
+		setUserObject("Open a document");
 	}
 
 	/**

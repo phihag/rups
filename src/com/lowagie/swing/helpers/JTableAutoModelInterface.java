@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractTool.java 49 2007-05-19 19:24:42Z chammer $
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,60 +24,35 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.rups.helpers;
-
-import javax.swing.table.AbstractTableModel;
+package com.lowagie.swing.helpers;
 
 /**
- * The table model used for the XRefTable.
+ * Tables that contain the information necessary for creating their model
+ * should implement this interface, so that they can use the JTableAutoModel
+ * class as TableModel.
  */
-public class XRefTableModel extends AbstractTableModel {
-
-	/** A serial version UID. */
-	private static final long serialVersionUID = 2286342108489097006L;
-	/** The table for which this is the model. */
-	protected XRefTable table;
-	
-	/**
-	 * Creates the XRefTableModel.
-	 * @param table	the table for which this model is used.
-	 */
-	public XRefTableModel(XRefTable table) {
-		this.table = table;
-	}
-	
+public interface JTableAutoModelInterface {
     /**
      * @see javax.swing.table.TableModel#getColumnCount()
      * @return int the number of columns
      */
-    public int getColumnCount() {
-		return table.getColumnCount();
-	}
-
-    /**
+	public int getColumnCount();
+	 /**
      * @see javax.swing.table.TableModel#getRowCount()
      * @return int the number of rows
      */
-    public int getRowCount() {
-		return table.getRowCount();
-	}
-
+    public int getRowCount();
+	/**
+	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+	 * @param columnIndex a column number.
+	 * @return the name of the column
+	 */
+	public String getColumnName(int columnIndex);
     /**
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      * @param rowIndex int		a row number
      * @param columnIndex int	a column number
      * @return Object	an object corresponding with a cell in the table
      */
-    public Object getValueAt(int rowIndex, int columnIndex) {
-    	return table.getValueAt(rowIndex, columnIndex);
-	}
-
-	/**
-	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
-	 * @param columnIndex a column number.
-	 * @return the name of the column
-	 */
-	public String getColumnName(int columnIndex) {
-		return table.getColumnName(columnIndex);
-	}
+    public Object getValueAt(int rowIndex, int columnIndex);
 }

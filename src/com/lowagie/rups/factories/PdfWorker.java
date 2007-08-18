@@ -1,9 +1,35 @@
+/*
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
+ * Copyright (c) 2007 Bruno Lowagie
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.lowagie.rups.factories;
 
 import javax.swing.SwingWorker;
 
 import com.lowagie.rups.Rups;
-import com.lowagie.swing.ui.ProgressFrame;
+import com.lowagie.swing.ui.ProgressDialog;
 import com.lowagie.text.pdf.PdfReader;
 
 /**
@@ -24,7 +50,7 @@ public class PdfWorker extends SwingWorker {
 	/** The object store */
 	IndirectObjectStore objects;
 	/** Keeps track of the progress */
-	protected ProgressFrame progress;
+	protected ProgressDialog progress;
 	
 	/**
 	 * Creates a PdfWorker instance.
@@ -33,7 +59,7 @@ public class PdfWorker extends SwingWorker {
 	 */
 	private PdfWorker(Rups rups, PdfReader reader) {
 		this.rups = rups;
-		progress = new ProgressFrame("Reading PDF file");
+		progress = new ProgressDialog(rups, "Reading PDF file");
 		objects = new IndirectObjectStore(reader);
 	}
 	
@@ -46,7 +72,7 @@ public class PdfWorker extends SwingWorker {
 		int n = objects.getXRefMaximum();
 		progress.setMessage("Reading the Cross-Reference table");
 		progress.setTotal(n);
-		while (objects.registerNextObject()) {
+		while (objects.storeNextObject()) {
 			progress.setValue(objects.getCurrent());
 		}
 		progress.setTotal(0);
@@ -69,6 +95,8 @@ public class PdfWorker extends SwingWorker {
 	/**
 	 * Loads a PDF into a RUPS application.
 	 * Note that each JVM can read only one PDF at a time.
+	 * @param	rups	The RUPS application that wants to load the PDF.
+	 * @param	reader	The reader from which the PDF is loaded.
 	 */
 	public static boolean loadPdf(Rups rups, PdfReader reader) {
 		if (busy) return false;

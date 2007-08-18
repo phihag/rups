@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractTool.java 49 2007-05-19 19:24:42Z chammer $
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -29,6 +29,8 @@ package com.lowagie.rups.factories;
 import java.util.ArrayList;
 
 import com.lowagie.text.pdf.IntHashtable;
+import com.lowagie.text.pdf.PdfDictionary;
+import com.lowagie.text.pdf.PdfName;
 import com.lowagie.text.pdf.PdfNull;
 import com.lowagie.text.pdf.PdfObject;
 import com.lowagie.text.pdf.PdfReader;
@@ -81,12 +83,12 @@ public class IndirectObjectStore {
 	}
 
 	/**
-	 * Registers the next object of the XRef table in the store.
-	 * As soon as this method returns false, it makes no sense
-	 * calling it as all the objects have been registered.
+	 * Stores the next object of the XRef table.
+	 * As soon as this method returns false, it makes no longer
+	 * sense calling it as all the objects have been stored.
 	 * @return	false if there are no objects left to check.
 	 */
-	public boolean registerNextObject() {
+	public boolean storeNextObject() {
 		while (current < n) {
 			current++;
 			PdfObject object = reader.getPdfObjectRelease(current);
@@ -94,11 +96,28 @@ public class IndirectObjectStore {
 				int idx = size();
 				idxToRef.put(idx, current);
 				refToIdx.put(current, idx);
-				objects.add(PdfNull.PDFNULL);
+				store(object);
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * If we store all the objects, we might run out of memory;
+	 * that's why we'll only store the objects that are necessary
+	 * to construct other objects (for instance the page table).
+	 * @param	object	an object we might want to store 
+	 */
+	private void store(PdfObject object) {
+		if (object.isDictionary()){
+			PdfDictionary dict = (PdfDictionary)object;
+			if (PdfName.PAGE.equals(dict.get(PdfName.TYPE))) {
+				objects.add(dict);
+				return;
+			}
+		}
+		objects.add(PdfNull.PDFNULL);
 	}
 	
 	/**
@@ -141,6 +160,8 @@ public class IndirectObjectStore {
 
 	/**
 	 * Gets an object based on its reference number in the xref table.
+	 * @param ref	a number in the xref table
+	 * @return	a PDF object
 	 */
 	public PdfObject getObjectByReference(int ref) {
 		return objects.get(getIndexByRef(ref));

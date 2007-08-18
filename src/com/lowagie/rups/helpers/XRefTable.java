@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractTool.java 49 2007-05-19 19:24:42Z chammer $
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -32,13 +32,15 @@ import javax.swing.table.TableColumn;
 
 import com.lowagie.rups.factories.IndirectObjectStore;
 import com.lowagie.rups.interfaces.PdfObjectRenderer;
+import com.lowagie.swing.helpers.JTableAutoModel;
+import com.lowagie.swing.helpers.JTableAutoModelInterface;
 import com.lowagie.text.pdf.PdfNull;
 import com.lowagie.text.pdf.PdfObject;
 
 /**
  * A JTable that shows the indirect objects of a PDF xref table.
  */
-public class XRefTable extends JTable {
+public class XRefTable extends JTable implements JTableAutoModelInterface {
 
 	/** A serial version UID. */
 	private static final long serialVersionUID = -382184619041375537L;
@@ -63,7 +65,7 @@ public class XRefTable extends JTable {
 			repaint();
 		}
 		else {
-			setModel(new XRefTableModel(this));
+			setModel(new JTableAutoModel(this));
 			TableColumn col= getColumnModel().getColumn(0);
 			col.setPreferredWidth(5);
 		}
@@ -127,13 +129,14 @@ public class XRefTable extends JTable {
 			return "Indirect object";
 		return object.toString();
 	}
+	
 	/**
 	 * @see javax.swing.JTable#getColumnName(int)
 	 */
 	public String getColumnName(int columnIndex) {
 		switch (columnIndex) {
 		case 0:
-			return "XRefNr";
+			return "Number";
 		case 1:
 			return "Object";
 		default:
@@ -168,6 +171,7 @@ public class XRefTable extends JTable {
 	public void selectRowByReference(int ref) {
 		int row = store.getIndexByRef(ref);
 		setRowSelectionInterval(row, row);
+		scrollRectToVisible(getCellRect(row, 1, true));
 		valueChanged(null);
 	}
 }

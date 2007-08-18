@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractTool.java 49 2007-05-19 19:24:42Z chammer $
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -29,7 +29,6 @@ package com.lowagie.rups.nodetypes;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
 
 import com.lowagie.text.pdf.PdfDictionary;
 import com.lowagie.text.pdf.PdfIndirectReference;
@@ -47,53 +46,79 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
 
 	/** the PDF object corresponding with this node. */
 	protected PdfObject object;
+	/** the key if the parent of this node is a dictionary. */
+	protected PdfName key = null;
 	/** if the object is indirect, the number of the PDF object. */
 	protected int number = -1;
+	/** indicates if the object is indirect and recursive. */
+	protected boolean recursive = false;
 
 	/**
 	 * Creates a tree node for a PDF object.
 	 * @param object	the PDF object represented by this tree node.
 	 */
-	public PdfObjectTreeNode(PdfObject object) {
+	protected PdfObjectTreeNode(PdfObject object) {
 		super(getCaption(object));
 		this.object = object;
 	}
-	
+
 	/**
-	 * Creates a tree node for a PDF object with a user defined caption.
-	 * @param userobject	a caption describing the PDF object represented by this tree node.
-	 * @param object		the PDF object represented by this tree node.
+	 * Creates an instance of a tree node for a PDF object.
+	 * @param object	the PDF object represented by this tree node.
+	 * @return	a PdfObjectTreeNode
 	 */
-	public PdfObjectTreeNode(Object userObject, PdfObject object) {
-		super(userObject);
-		this.object = object;
+	public static PdfObjectTreeNode getInstance(PdfObject object) {
+		if (object.isDictionary()) {
+			if (PdfName.PAGE.equals(((PdfDictionary)object).get(PdfName.TYPE))) {
+				return new PdfPageTreeNode((PdfDictionary)object);
+			}
+			else if (PdfName.PAGES.equals(((PdfDictionary)object).get(PdfName.TYPE))) {
+				return new PdfPagesTreeNode((PdfDictionary)object);
+			}
+		}
+		return new PdfObjectTreeNode(object);
 	}
 	
 	/**
-	 * Creates a tree node for the object corresponding with a key in a dictionary.
-	 * @param dict	the dictionary that is the parent of this tree node.
-	 * @param key	the dictionary key corresponding with the PDF object in this tree node.
-	 */
-	public PdfObjectTreeNode(PdfDictionary dict, PdfName key) {
-		this(getDictionaryEntryCaption(dict, key), dict.get(key));
-	}
-	
-	/**
-	 * Creates a tree node for an indirect object.
+	 * Creates an instance of a tree node for an indirect object.
 	 * @param object	the PDF object represented by this tree node.
 	 * @param object	the xref number of the indirect object
+	 * @return	a PdfObjectTreeNode
 	 */
-	public PdfObjectTreeNode(PdfObject object, int number) {
-		this(object);
-		this.number = number;
+	public static PdfObjectTreeNode getInstance(PdfObject object, int number) {
+		PdfObjectTreeNode node = getInstance(object);
+		node.number = number;
+		return node;
 	}
 
+	/**
+	 * Creates an instance of a tree node for the object corresponding with a key in a dictionary.
+	 * @param dict	the dictionary that is the parent of this tree node.
+	 * @param key	the dictionary key corresponding with the PDF object in this tree node.
+	 * @return	a PdfObjectTreeNode
+	 */
+	public static PdfObjectTreeNode getInstance(PdfDictionary dict, PdfName key) {
+		PdfObjectTreeNode node = getInstance(dict.get(key));
+		node.setUserObject(getDictionaryEntryCaption(dict, key));
+		node.key = key;
+		return node;
+	}
+	
 	/**
 	 * Getter for the PDF Object.
 	 * @return	the PDF object represented by this tree node.
 	 */
 	public PdfObject getPdfObject() {
 		return object;
+	}
+	
+	/**
+	 * Checks if this node is a dictionary item with a specific key.
+	 * @param	key	the key of the node we're looking for
+	 */
+	public boolean isDictionaryNode(PdfName key) {
+		if (key == null) return false;
+		return key.equals(this.key);
 	}
 	
 	/**
@@ -111,13 +136,21 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
 	public boolean isIndirect() {
 		return isIndirectReference() || number > -1;
 	}
+
+	/**
+	 * Set this to true if the object is a reference to a node higher up in the tree.
+	 * @param	recursive	true if the object is indirect and recursive
+	 */
+	public void setRecursive(boolean recursive) {
+		this.recursive = recursive;
+	}
 	
 	/**
 	 * Tells you if the object is a reference to a node higher up in the tree.
 	 * @return	true if the node is used recursively.
 	 */
-	public boolean isRecursiveReference() {
-		return isIndirectReference() && getChildCount() == 0;
+	public boolean isRecursive() {
+		return recursive;
 	}
 
 	/**
@@ -138,12 +171,12 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
     public Icon getIcon() {
     	switch(object.type()) {
     	case PdfObject.INDIRECT:
-    		if (this.getChildCount() > 0)
+    		if (isRecursive())
     			return new ImageIcon(PdfObjectTreeNode.class
-        				.getResource("icons/ref.png"));
+        				.getResource("icons/ref_recursive.png"));
     		else
     			return new ImageIcon(PdfObjectTreeNode.class
-    				.getResource("icons/ref_recursive.png"));
+        				.getResource("icons/ref.png"));
     	case PdfObject.ARRAY:
     		return new ImageIcon(PdfObjectTreeNode.class
     				.getResource("icons/array.png"));
@@ -210,13 +243,13 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
 	 * This only works with recursive references
 	 * @return	the treepath to an ancestor
 	 */
-	public TreePath getAncestor() {
-		if (isRecursiveReference()) {
+	public PdfObjectTreeNode getAncestor() {
+		if (isRecursive()) {
 			PdfObjectTreeNode node = this;
 			while(true) {
 				node = (PdfObjectTreeNode)node.getParent();
 				if (node.isIndirectReference() && node.getNumber() == getNumber()) {
-					return new TreePath(node.getPath());
+					return node;
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * $Id: Toolbox.java 52 2007-05-20 15:52:29Z chammer $
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person

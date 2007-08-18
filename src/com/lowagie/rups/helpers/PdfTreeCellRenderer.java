@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractTool.java 49 2007-05-19 19:24:42Z chammer $
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -31,6 +31,7 @@ import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import com.lowagie.rups.nodetypes.OutlineTreeNode;
 import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
 
 /**
@@ -51,6 +52,9 @@ public class PdfTreeCellRenderer extends DefaultTreeCellRenderer {
 		if (value instanceof PdfObjectTreeNode) {
 			PdfObjectTreeNode node = (PdfObjectTreeNode) value;
 			setIcon(node.getIcon());
+		}
+		else if (value instanceof OutlineTreeNode) {
+			setIcon(OutlineTreeNode.getIcon());
 		}
 		return this;
 	}

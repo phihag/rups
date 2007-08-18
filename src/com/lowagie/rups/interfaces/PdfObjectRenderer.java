@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractTool.java 49 2007-05-19 19:24:42Z chammer $
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,8 +26,6 @@
 
 package com.lowagie.rups.interfaces;
 
-import java.io.IOException;
-
 import com.lowagie.text.pdf.PdfObject;
 
 /**
@@ -38,7 +36,6 @@ public interface PdfObjectRenderer {
 	/**
 	 * Renders the object.
 	 * @param object	the object that needs to be rendered
-	 * @throws IOException	if the object can't be read from the PdfReader
 	 */
 	void render(PdfObject object);
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractTool.java 49 2007-05-19 19:24:42Z chammer $
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -30,18 +30,31 @@ import java.io.File;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import com.lowagie.rups.factories.TreeNodeFactory;
+import com.lowagie.rups.interfaces.PdfTreeNodeSelector;
+import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
+import com.lowagie.rups.nodetypes.PdfPagesTreeNode;
 import com.lowagie.rups.nodetypes.PdfTrailerTreeNode;
 import com.lowagie.text.pdf.PdfDictionary;
+import com.lowagie.text.pdf.PdfName;
 
-public class PdfTree extends JTree {
+/**
+ * A JTree that shows the object hierarchy of a PDF document.
+ */
+public class PdfTree extends JTree implements PdfTreeNodeSelector {
 
 	/** a serial version UID */
 	private static final long serialVersionUID = 7545804447512085734L;
 	
 	/** The root of the PDF tree. */
 	protected PdfTrailerTreeNode root = new PdfTrailerTreeNode();
+	
+	/** The root of the page tree. */
+	protected PdfPagesTreeNode pages;
+	/** The root of the Outline tree. */
+	protected PdfObjectTreeNode outlines;
 	
 	/**
 	 * Constructs a PDF tree.
@@ -54,6 +67,7 @@ public class PdfTree extends JTree {
 	
 	/**
 	 * Sets or resets the user object of the root.
+	 * @param	file	a new file to be shown in the tree
 	 */
 	public void resetRoot(File file) {
 		root = new PdfTrailerTreeNode();
@@ -64,11 +78,38 @@ public class PdfTree extends JTree {
 	
 	/**
 	 * Sets or resets the root of this PDF tree.
+	 * @param	factory	a new tree node factory for the tree
+	 * @param	trailer	the trailer of a new PDF
 	 */
 	public void resetRoot(TreeNodeFactory factory, PdfDictionary trailer) {
 		root.setTrailer(trailer);
 		factory.expandNode(root);
 		setModel(new DefaultTreeModel(root));
+		PdfObjectTreeNode catalog = factory.getChildNode(root, PdfName.ROOT);
+		pages = (PdfPagesTreeNode)factory.getChildNode(catalog, PdfName.PAGES);
+		outlines = factory.getChildNode(catalog, PdfName.OUTLINES); 
 		repaint();
+	}
+
+	/**
+	 * Gets the root of the page tree
+	 * @return	the top level PdfPagesTreeNode
+	 */
+	public PdfPagesTreeNode getPages() {
+		return pages;
+	}
+
+	public void selectNode(PdfObjectTreeNode node) {
+		TreePath path = new TreePath(node.getPath());
+		setSelectionPath(path);
+		scrollPathToVisible(path);
+	}
+
+	/**
+	 * Gets the root of the outline tree.
+	 * @return	the top level Outline TreeNode
+	 */
+	public PdfObjectTreeNode getOutlines() {
+		return outlines;
 	}
 }

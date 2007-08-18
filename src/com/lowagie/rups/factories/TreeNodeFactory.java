@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractTool.java 49 2007-05-19 19:24:42Z chammer $
+ * $Id: PdfDocument.java 2884 2007-08-15 09:28:41Z blowagie $
  * Copyright (c) 2007 Bruno Lowagie
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,11 +27,11 @@
 package com.lowagie.rups.factories;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
+import com.lowagie.rups.nodetypes.PdfPagesTreeNode;
 import com.lowagie.text.pdf.PdfArray;
 import com.lowagie.text.pdf.PdfDictionary;
 import com.lowagie.text.pdf.PdfIndirectReference;
@@ -57,9 +57,8 @@ public class TreeNodeFactory {
 	public TreeNodeFactory(IndirectObjectStore objectStore) {
 		this.objects = objectStore;
 		for (int i = 0; i < objects.size(); i++) {
-		//	PdfObject object = objects.getObjectByIndex(i);
 			int ref = objects.getRefByIndex(i);
-			nodes.add(new PdfObjectTreeNode(PdfNull.PDFNULL, ref));
+			nodes.add(PdfObjectTreeNode.getInstance(PdfNull.PDFNULL, ref));
 		}
 	}
 	
@@ -72,7 +71,7 @@ public class TreeNodeFactory {
 		int idx = objects.getIndexByRef(ref);
 		PdfObjectTreeNode node = nodes.get(idx);
 		if (node.getPdfObject().isNull()) {
-			node = new PdfObjectTreeNode(objects.loadObjectByReference(ref), ref);
+			node = PdfObjectTreeNode.getInstance(objects.loadObjectByReference(ref), ref);
 			nodes.set(idx, node);
 		}
 		return node;
@@ -92,11 +91,13 @@ public class TreeNodeFactory {
 			PdfIndirectReference ref = (PdfIndirectReference)object;
 			leaf = getNode(ref.getNumber());
 			addNodes(node, leaf);
+			if (leaf instanceof PdfPagesTreeNode)
+				expandNode(leaf);
 			return;
 		case PdfObject.ARRAY:
 			PdfArray array = (PdfArray)object;
 			for (Iterator it = array.getArrayList().iterator(); it.hasNext(); ) {
-				leaf = new PdfObjectTreeNode((PdfObject)it.next());
+				leaf = PdfObjectTreeNode.getInstance((PdfObject)it.next());
 				addNodes(node, leaf);
 				expandNode(leaf);
 			}
@@ -105,12 +106,34 @@ public class TreeNodeFactory {
 		case PdfObject.STREAM:
 			PdfDictionary dict = (PdfDictionary)object;
 			for (Iterator it = dict.getKeys().iterator(); it.hasNext(); ) {
-				leaf = new PdfObjectTreeNode(dict, (PdfName)it.next());
+				leaf = PdfObjectTreeNode.getInstance(dict, (PdfName)it.next());
 				addNodes(node, leaf);
 				expandNode(leaf);
 			}
 			return;
 		}
+	}
+	
+	/**
+	 * Finds a specific child of dictionary node.
+	 * @param	node	the node with a dictionary among its children
+	 * @param	key		the key of the item corresponding with the node we need
+	 */
+	public PdfObjectTreeNode getChildNode(PdfObjectTreeNode node, PdfName key) {
+		Enumeration children = node.breadthFirstEnumeration();
+		PdfObjectTreeNode child;
+		while (children.hasMoreElements()) {
+			child = (PdfObjectTreeNode)children.nextElement();
+			if (child.isDictionaryNode(key)) {
+				if (child.isIndirectReference()) {
+					expandNode(child);
+					child = (PdfObjectTreeNode)child.getFirstChild();
+				}
+				expandNode(child);
+				return child;
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -122,12 +145,12 @@ public class TreeNodeFactory {
 	 * @param parent	the parent node
 	 * @param child		a child node
 	 */
-	private void addNodes(DefaultMutableTreeNode parent, DefaultMutableTreeNode child) {
+	private void addNodes(PdfObjectTreeNode parent, PdfObjectTreeNode child) {
 		try {
 			parent.add(child);
 		}
 		catch(IllegalArgumentException iae) {
-			// do nothing
+			parent.setRecursive(true);
 		}
 	}
 }
