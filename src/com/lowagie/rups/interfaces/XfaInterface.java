@@ -24,38 +24,24 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.rups.helpers;
+package com.lowagie.rups.interfaces;
 
-import java.awt.Component;
-
-import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeCellRenderer;
-
-import com.lowagie.rups.nodetypes.OutlineTreeNode;
-import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * Renders the tree cells with the correct icon.
+ * An object that implements the XfaInterface can write (part of) an
+ * XFA resource to an OutputStream.
  */
-public class PdfTreeCellRenderer extends DefaultTreeCellRenderer {
-
-	/** a serial version UID. */
-	private static final long serialVersionUID = 6513462839504342074L;
-
+public interface XfaInterface {
 	/**
-	 * @see javax.swing.tree.DefaultTreeCellRenderer#getTreeCellRendererComponent(javax.swing.JTree, java.lang.Object, boolean, boolean, boolean, int, boolean)
+	 * Writes (part of) an XFA resource to an OutputStream.
+	 * If key is <code>null</code>, the complete resource is written;
+	 * if key refers to an individual package, this package only is
+	 * written to the OutputStream.
+	 * @param os	the OutputStream to which the XML is written.
+	 * @param key	the key of an individual package (can be null if the complete XML file is needed)
+	 * @throws IOException	usual exception when there's a problem writing to an OutputStream
 	 */
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean selected, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
-		super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-		if (value instanceof PdfObjectTreeNode) {
-			PdfObjectTreeNode node = (PdfObjectTreeNode) value;
-			setIcon(node.getIcon());
-		}
-		else if (value instanceof OutlineTreeNode) {
-			setIcon(OutlineTreeNode.getIcon());
-		}
-		return this;
-	}
+	public void writeTo(OutputStream os, String key) throws IOException;
 }

@@ -33,7 +33,7 @@ import com.lowagie.swing.ui.ProgressDialog;
 import com.lowagie.text.pdf.PdfReader;
 
 /**
- * This class reads the indirect objects of a PDF file into an IndirectObjectStore.
+ * This class reads the indirect objects of a PDF file into an IndirectObjectFactory.
  * It also updates the components of the RUSP Viewer.
  * The class extends SwingWorker because reading the XRef table of some PDF documents
  * (for instance the PDF Reference Manual) is a long running task.
@@ -47,8 +47,8 @@ public class PdfWorker extends SwingWorker {
 	protected static boolean busy = false;
 	/** The rups application using this RupsComponents class. */
 	protected Rups rups;
-	/** The object store */
-	IndirectObjectStore objects;
+	/** The object factory */
+	IndirectObjectFactory objects;
 	/** Keeps track of the progress */
 	protected ProgressDialog progress;
 	
@@ -60,7 +60,7 @@ public class PdfWorker extends SwingWorker {
 	private PdfWorker(Rups rups, PdfReader reader) {
 		this.rups = rups;
 		progress = new ProgressDialog(rups, "Reading PDF file");
-		objects = new IndirectObjectStore(reader);
+		objects = new IndirectObjectFactory(reader);
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class PdfWorker extends SwingWorker {
 
 	/**
 	 * Updates the components in the RUPS viewer, using
-	 * the indirect objects store.
+	 * the indirect objects factory.
 	 * @see javax.swing.SwingWorker#done()
 	 */
 	@Override

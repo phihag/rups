@@ -28,20 +28,58 @@ package com.lowagie.rups.nodetypes;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.lowagie.rups.interfaces.TreeNodeWithIcon;
 import com.lowagie.text.pdf.PdfDictionary;
+import com.lowagie.text.pdf.PdfName;
+import com.lowagie.text.pdf.PdfObject;
 
-public class PdfPagesTreeNode extends PdfObjectTreeNode {
+/**
+ * A FormTreeNode is a standard node in a FormTree.
+ */
+public class FormTreeNode extends DefaultMutableTreeNode
+	implements TreeNodeWithIcon {
 
-	/** a serial version uid */
-	private static final long serialVersionUID = 4527774449030791503L;
-
+	/** A serial version UID. */
+	private static final long serialVersionUID = 7800080437550790989L;
+	
+	/** The corresponding tree node in the PdfTree. */
+	protected PdfObjectTreeNode object_node;
+	
 	/**
-	 * Creates a tree node for a Pages dictionary.
-	 * @param	object	a PdfDictionary of type pages.
+	 * Creates the root node of the FormTree.
 	 */
-	public PdfPagesTreeNode(PdfDictionary object) {
-		super(object);
+	public FormTreeNode() {
+		super("Form");
+	}
+	
+	/**
+	 * Creates a node corresponding with a node in the PdfTree.
+	 * @param	node	a corresponding node
+	 */
+	public FormTreeNode(PdfObjectTreeNode node) {
+		super();
+		this.object_node = node;
+		if (node.isDictionary()) {
+			PdfDictionary dict = (PdfDictionary)node.getPdfObject();
+			PdfObject fieldname = dict.get(PdfName.T);
+			if (fieldname != null) {
+				this.setUserObject(fieldname);
+			}
+			else {
+				this.setUserObject("unnamed field");
+			}
+		}
+	}
+
+    /**
+     * Gets the node in the PdfTree that corresponds with this
+     * FormTreeNode.
+     * @return	a PdfObjectTreeNode in the PdfTree
+     */
+	public PdfObjectTreeNode getCorrespondingPdfObjectNode() {
+		return object_node;
 	}
 
     /**
@@ -49,7 +87,7 @@ public class PdfPagesTreeNode extends PdfObjectTreeNode {
      * @return	the icon corresponding with the object
      */
     public Icon getIcon() {
-		return new ImageIcon(PdfPagesTreeNode.class
-			.getResource("icons/pages.png"));
+		return new ImageIcon(FormTreeNode.class
+			.getResource("icons/form.png"));
     }
 }

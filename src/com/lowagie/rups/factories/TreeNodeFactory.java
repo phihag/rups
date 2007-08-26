@@ -44,18 +44,18 @@ import com.lowagie.text.pdf.PdfObject;
  */
 public class TreeNodeFactory {
 
-	/** The store containing all indirect objects. */
-	protected IndirectObjectStore objects;
-	/** An list containing the nodes of every indirect objects. */
+	/** The factory that can produce all indirect objects. */
+	protected IndirectObjectFactory objects;
+	/** An list containing the nodes of every indirect object. */
 	protected ArrayList<PdfObjectTreeNode> nodes = new ArrayList<PdfObjectTreeNode>();
 	
 	/**
 	 * Creates a factory that can produce TreeNode objects
 	 * corresponding with PDF objects.
-	 * @param objectStore	a store containing all the indirect objects of a PDF file.
+	 * @param objects	a factory that can produce all the indirect objects of a PDF file.
 	 */
-	public TreeNodeFactory(IndirectObjectStore objectStore) {
-		this.objects = objectStore;
+	public TreeNodeFactory(IndirectObjectFactory objects) {
+		this.objects = objects;
 		for (int i = 0; i < objects.size(); i++) {
 			int ref = objects.getRefByIndex(i);
 			nodes.add(PdfObjectTreeNode.getInstance(PdfNull.PDFNULL, ref));

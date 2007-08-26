@@ -34,7 +34,7 @@ import com.lowagie.text.pdf.PdfObject;
 public interface PdfObjectRenderer {
 
 	/**
-	 * Renders the object.
+	 * Renders the object, for instance in an information panel.
 	 * @param object	the object that needs to be rendered
 	 */
 	void render(PdfObject object);

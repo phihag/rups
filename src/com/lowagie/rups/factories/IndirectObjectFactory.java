@@ -36,9 +36,9 @@ import com.lowagie.text.pdf.PdfObject;
 import com.lowagie.text.pdf.PdfReader;
 
 /**
- * A store containing all the indirect objects in a PDF file.
+ * A factory that can produce all the indirect objects in a PDF file.
  */
-public class IndirectObjectStore {
+public class IndirectObjectFactory {
 
 	/** The reader object. */
 	protected PdfReader reader;
@@ -58,7 +58,7 @@ public class IndirectObjectStore {
 	 * in a PDF document. 
 	 * @param reader	the reader that will read the PDF document
 	 */
-	public IndirectObjectStore(PdfReader reader) {
+	public IndirectObjectFactory(PdfReader reader) {
 		this.reader = reader;
 		current = -1;
 		n = reader.getXrefSize();
@@ -66,7 +66,7 @@ public class IndirectObjectStore {
 
 	/**
 	 * Gets the last object that has been registered.
-	 * This method only makes sense while loading the store
+	 * This method only makes sense while loading the factory.
 	 * with loadNextObject().
 	 * @return	the number of the last object that was stored
 	 */

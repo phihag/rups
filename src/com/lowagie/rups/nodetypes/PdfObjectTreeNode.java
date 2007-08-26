@@ -30,6 +30,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.lowagie.rups.interfaces.TreeNodeWithIcon;
 import com.lowagie.text.pdf.PdfDictionary;
 import com.lowagie.text.pdf.PdfIndirectReference;
 import com.lowagie.text.pdf.PdfName;
@@ -39,7 +40,8 @@ import com.lowagie.text.pdf.PdfObject;
  * Every node in our tree corresponds with a PDF object.
  * This class is the superclass of all tree nodes used.
  */
-public class PdfObjectTreeNode extends DefaultMutableTreeNode {
+public class PdfObjectTreeNode extends DefaultMutableTreeNode
+	implements TreeNodeWithIcon {
 
 	/** a serial version UID. */
 	private static final long serialVersionUID = -5617844659397445879L;
@@ -111,14 +113,16 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
 	public PdfObject getPdfObject() {
 		return object;
 	}
-	
+
 	/**
-	 * Checks if this node is a dictionary item with a specific key.
-	 * @param	key	the key of the node we're looking for
+	 * Getter for the object number in case the object is indirect.
+	 * @return	-1 for direct objects; the object number for indirect objects
 	 */
-	public boolean isDictionaryNode(PdfName key) {
-		if (key == null) return false;
-		return key.equals(this.key);
+	public int getNumber() {
+		if (isIndirectReference()) {
+			return ((PdfIndirectReference)object).getNumber();
+		}
+		return number;
 	}
 	
 	/**
@@ -136,6 +140,39 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
 	public boolean isIndirect() {
 		return isIndirectReference() || number > -1;
 	}
+	
+	/**
+	 * Tells you if the node contains an array.
+	 * @return	true if the object is a PdfArray
+	 */
+	public boolean isArray() {
+		return object.isArray();
+	}
+	
+	/**
+	 * Checks if this node is a dictionary item with a specific key.
+	 * @param	key	the key of the node we're looking for
+	 */
+	public boolean isDictionaryNode(PdfName key) {
+		if (key == null) return false;
+		return key.equals(this.key);
+	}
+	
+	/**
+	 * Tells you if the node contains a dictionary.
+	 * @return	true if the object is a PdfDictionary
+	 */
+	public boolean isDictionary() {
+		return object.isDictionary();
+	}
+	
+	/**
+	 * Tells you if the node contains a stream.
+	 * @return	true if the object is a PRStream
+	 */
+	public boolean isStream() {
+		return object.isStream();
+	}
 
 	/**
 	 * Set this to true if the object is a reference to a node higher up in the tree.
@@ -151,17 +188,6 @@ public class PdfObjectTreeNode extends DefaultMutableTreeNode {
 	 */
 	public boolean isRecursive() {
 		return recursive;
-	}
-
-	/**
-	 * Getter for the object number in case the object is indirect.
-	 * @return	-1 for direct objects; the object number for indirect objects
-	 */
-	public int getNumber() {
-		if (isIndirectReference()) {
-			return ((PdfIndirectReference)object).getNumber();
-		}
-		return number;
 	}
 
     /**

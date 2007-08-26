@@ -24,32 +24,23 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.rups.nodetypes;
+package com.lowagie.swing.helpers;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
+import java.awt.Component;
 
-import com.lowagie.text.pdf.PdfDictionary;
+import javax.swing.JScrollPane;
 
-public class PdfPagesTreeNode extends PdfObjectTreeNode {
-
-	/** a serial version uid */
-	private static final long serialVersionUID = 4527774449030791503L;
+public class Utilities {
 
 	/**
-	 * Creates a tree node for a Pages dictionary.
-	 * @param	object	a PdfDictionary of type pages.
+	 * Adds a component to a ScrollPane.
+	 * @param	component	the component that has to be scrollable
+	 * @return	a JScrollPane
 	 */
-	public PdfPagesTreeNode(PdfDictionary object) {
-		super(object);
+	public static JScrollPane getScrollPane(Component component) {
+		JScrollPane scrollpane = new JScrollPane();
+		scrollpane.setViewportView(component);
+		return scrollpane;
 	}
 
-    /**
-     * Getter for the icon that is to be used for this tree node.
-     * @return	the icon corresponding with the object
-     */
-    public Icon getIcon() {
-		return new ImageIcon(PdfPagesTreeNode.class
-			.getResource("icons/pages.png"));
-    }
 }

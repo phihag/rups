@@ -38,25 +38,27 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
-import com.lowagie.rups.factories.IndirectObjectStore;
+import com.lowagie.rups.components.FormTree;
+import com.lowagie.rups.components.OutlineTree;
+import com.lowagie.rups.components.PagesTable;
+import com.lowagie.rups.components.InfoPanel;
+import com.lowagie.rups.components.PdfTree;
+import com.lowagie.rups.components.XRefTable;
+import com.lowagie.rups.components.io.PdfFileSaver;
+import com.lowagie.rups.factories.IndirectObjectFactory;
 import com.lowagie.rups.factories.PdfWorker;
 import com.lowagie.rups.factories.TreeNodeFactory;
-import com.lowagie.rups.helpers.OutlineTree;
-import com.lowagie.rups.helpers.PagesTable;
-import com.lowagie.rups.helpers.PdfObjectPanel;
-import com.lowagie.rups.helpers.PdfTree;
-import com.lowagie.rups.helpers.XRefTable;
 import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
 import com.lowagie.rups.nodetypes.PdfTrailerTreeNode;
 import com.lowagie.swing.browse.BrowseResult;
 import com.lowagie.swing.browse.FileChooserAction;
 import com.lowagie.swing.browse.filters.PdfFilter;
+import com.lowagie.swing.helpers.Utilities;
 import com.lowagie.text.pdf.PdfPageLabels;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.RandomAccessFileOrArray;
@@ -71,20 +73,33 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 
 	/** The reader object for this PDF file. */
 	protected PdfReader reader = null;
-	/** The factory that generates the tree nodes. */
-	protected TreeNodeFactory factory;
-	/** The table that will show info about the PDFs Crossreference table. */
-	protected XRefTable xrefTable = new XRefTable();
-	/** The tree that will reveal the internal PDF structure.  */
-	protected PdfTree pdfTree = new PdfTree();
+	/** The action to open a file chooser. */
+	protected FileChooserAction fileChooserAction;
+	/** The save button in the menu bar will be enabled and disabled. */
+	protected JMenuItem save;
+	
+	// left pane
+
 	/** The table that will show info about the pages. */
 	protected PagesTable pages = new PagesTable();
 	/** The outlines tree. */
 	protected OutlineTree outlines = new OutlineTree();
+	/** The form tree. */
+	protected FormTree form = new FormTree();
+	/** The table that will show info about the PDFs Crossreference table. */
+	protected XRefTable xref = new XRefTable();
+	
+	// right pane
+	
+	/** The tree that will reveal the internal PDF structure.  */
+	protected PdfTree pdf = new PdfTree();
+	/** The factory that generates the tree nodes. */
+	protected TreeNodeFactory nodes;
+	
+	// bottom pane
+	
 	/** The panel that will contain info about a PDF object (card layout). */
-	protected PdfObjectPanel objectPanel = new PdfObjectPanel();
-	/** The action to open a file chooser. */
-	protected FileChooserAction fileChooserAction;
+	protected InfoPanel info = new InfoPanel();
 	
 	/**
 	 * Main method of this application.
@@ -100,7 +115,7 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 	public Rups() {
         super();
 		fileChooserAction = new FileChooserAction(this, "Open", PdfFilter.INSTANCE, false);
-		pdfTree.addTreeSelectionListener(this);
+		pdf.addTreeSelectionListener(this);
         initialize();
 		setVisible(true);
 	}
@@ -121,39 +136,36 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
         setTitle("RUPS: Understanding PDF Syntax");
         setJMenuBar(getMenu());
         
+        // overall lay-out
 		this.getContentPane().setLayout(new BorderLayout());
 		JSplitPane main_splitpane = new JSplitPane();
 		main_splitpane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		main_splitpane.setDividerLocation((int)(screen.getHeight() * .5));
 		this.getContentPane().add(main_splitpane, java.awt.BorderLayout.CENTER);
-		main_splitpane.add(objectPanel, JSplitPane.BOTTOM);
-		
 		JPanel top_panel = new JPanel();
 		top_panel.setLayout(new BorderLayout());
 		main_splitpane.add(top_panel, JSplitPane.TOP);
-		
 		JSplitPane top_splitpane = new JSplitPane();
 		top_splitpane.setDividerSize(3);
 		top_splitpane.setDividerLocation((int)(screen.getWidth() * .2));
-		JScrollPane tree_scrollpane = new JScrollPane();
-		tree_scrollpane.setViewportView(pdfTree);
-		top_splitpane.add(tree_scrollpane, JSplitPane.BOTTOM);
-		
-		JTabbedPane info_panel = new JTabbedPane();
-		JScrollPane pages_scrollpane = new JScrollPane();
-		pages_scrollpane.setViewportView(pages);
-		info_panel.addTab("Pages", null, pages_scrollpane, "Pages");
-		JScrollPane outlines_scrollpane = new JScrollPane();
-		outlines_scrollpane.setViewportView(outlines);
-		info_panel.addTab("Outlines", outlines_scrollpane);
-		JScrollPane xref_scrollpane = new JScrollPane();
-		xref_scrollpane.setViewportView(xrefTable);
-		info_panel.addTab("XRef", null, xref_scrollpane, "Cross-reference table");
-		top_splitpane.add(info_panel, JSplitPane.TOP);
 		top_panel.add(top_splitpane, BorderLayout.CENTER);
+
+		// left pane
+		JTabbedPane tabs = new JTabbedPane();
+		top_splitpane.add(tabs, JSplitPane.TOP);
+		tabs.addTab("Pages", null, Utilities.getScrollPane(pages), "Pages");
+		tabs.addTab("Outlines", null, Utilities.getScrollPane(outlines), "Outlines (Bookmarks)");
+		tabs.addTab("Form", null, Utilities.getScrollPane(form), "Interactive Form");
+		tabs.addTab("XRef", null, Utilities.getScrollPane(xref), "Cross-reference table");
+		
+		// right pane
+		top_splitpane.add(Utilities.getScrollPane(pdf), JSplitPane.BOTTOM);
+		
+		// bottom pane
+		main_splitpane.add(info, JSplitPane.BOTTOM);
 	}
 	
-	/**
+    /**
 	 * Creates a menu bar.
 	 * @return the menu bar for the application.
 	 */
@@ -163,6 +175,10 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
         JMenuItem open = new JMenuItem("Open");
         open.setAction(fileChooserAction);
         file.add(open);
+        save = new JMenuItem("Save As");
+        save.setAction(new FileChooserAction(new PdfFileSaver(this), "Save As", PdfFilter.INSTANCE, true));
+        save.setEnabled(false);
+        file.add(save);
         bar.add(file);
 		return bar;
 	}
@@ -171,20 +187,29 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 	 * @see com.lowagie.swing.browse.BrowseResult#setFile(java.io.File)
 	 */
 	public void setFile(File file) {
+		// left pane
+		pages.loadPages(null, null);
+		outlines.loadOutlines(null, null);
+		form.loadFields(null, null);
+		xref.setObjects(null, null);
+		// right pane
+		pdf.resetRoot(file);
+		// bottom pane
+		info.clear();
+        save.setEnabled(false);
+		// new reader and go for it!
 		try {
-			objectPanel.clear();
-			xrefTable.setObjects(null);
-			pages.loadPages(null, null);
-			outlines.loadOutlines(null, null);
 			reader = new PdfReader(new RandomAccessFileOrArray(file.getAbsolutePath()), null);
-			if (!PdfWorker.loadPdf(this, reader)) {
-				JOptionPane.showMessageDialog(this, "Currently loading another PDF document.\nYou can only load one PDF at a time.", "Dialog", JOptionPane.WARNING_MESSAGE);
+			if (PdfWorker.loadPdf(this, reader)) {
+				pdf.repaint();
+		        save.setEnabled(true);
 			}
 			else {
-				pdfTree.resetRoot(file);
+				JOptionPane.showMessageDialog(this, "Currently loading another PDF document.\nYou can only load one PDF at a time.", "Dialog", JOptionPane.WARNING_MESSAGE);
 			}
 		} catch (IOException e) {
 			reader = null;
+	        save.setEnabled(false);
 			JOptionPane.showMessageDialog(this, e.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
 		}
 	}
@@ -192,38 +217,48 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 	/**
 	 * Updates the components of the Rups application
 	 * because a new PDF document was loaded into an
-	 * indirect object store.
-	 * @param	objects	the indirect object store
+	 * indirect object factory.
+	 * @param	objects	the indirect object factory
 	 */
-	public void update(IndirectObjectStore objects) {
-		factory = new TreeNodeFactory(objects);
-		xrefTable.setObjects(objects);
-		xrefTable.setRenderer(objectPanel);
-		pdfTree.resetRoot(factory, reader.getTrailer());
-		pages.loadPages(pdfTree, PdfPageLabels.getPageLabels(reader));
-		outlines.loadOutlines(factory, pdfTree);
+	public void update(IndirectObjectFactory objects) {
+		// right pane
+		nodes = new TreeNodeFactory(objects);
+		pdf.resetRoot(nodes, reader.getTrailer());
+		// left pane
+		pages.loadPages(pdf, PdfPageLabels.getPageLabels(reader));
+		outlines.loadOutlines(nodes, pdf);
+		form.loadFields(nodes, pdf);
+		xref.setObjects(objects, info);
 	}
 	
 	/**
 	 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
 	 */
 	public void valueChanged(TreeSelectionEvent e) {
-		Object selectednode = pdfTree.getLastSelectedPathComponent();
+		Object selectednode = pdf.getLastSelectedPathComponent();
 		if (selectednode instanceof PdfTrailerTreeNode) {
 			fileChooserAction.actionPerformed(null);
 		}
 		else if (selectednode instanceof PdfObjectTreeNode) {
 			PdfObjectTreeNode node = (PdfObjectTreeNode)selectednode;
-			factory.expandNode(node);
+			nodes.expandNode(node);
 			if (node.isRecursive()) {
-				pdfTree.selectNode(node.getAncestor());
+				pdf.selectNode(node.getAncestor());
 			}
 			else if (node.isIndirect()) {
-				xrefTable.selectRowByReference(node.getNumber());
+				xref.selectRowByReference(node.getNumber());
 			}
 			else {
-				objectPanel.render(node.getPdfObject());
+				info.render(node.getPdfObject());
 			}
 		}
+	}
+
+	/**
+	 * Gets the PdfReader of the PDF file shown in the RUPS application.
+	 * @return	a PdfReader object
+	 */
+	public PdfReader getReader() {
+		return reader;
 	}
 }
