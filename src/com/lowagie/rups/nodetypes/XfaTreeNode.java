@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
 
-import com.lowagie.swing.browse.OutputStreamResource;
+import com.lowagie.swing.files.OutputStreamResource;
 import com.lowagie.text.pdf.PRStream;
 import com.lowagie.text.pdf.PdfReader;
 

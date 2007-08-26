@@ -55,11 +55,11 @@ import com.lowagie.rups.factories.PdfWorker;
 import com.lowagie.rups.factories.TreeNodeFactory;
 import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
 import com.lowagie.rups.nodetypes.PdfTrailerTreeNode;
-import com.lowagie.swing.browse.BrowseResult;
-import com.lowagie.swing.browse.FileChooserAction;
-import com.lowagie.swing.browse.OutputStreamResource;
-import com.lowagie.swing.browse.SaveAction;
-import com.lowagie.swing.browse.filters.PdfFilter;
+import com.lowagie.swing.files.BrowseResult;
+import com.lowagie.swing.files.FileChooserAction;
+import com.lowagie.swing.files.OutputStreamResource;
+import com.lowagie.swing.files.SaveAction;
+import com.lowagie.swing.files.filters.PdfFilter;
 import com.lowagie.swing.helpers.Utilities;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfPageLabels;
@@ -197,7 +197,7 @@ public class Rups extends JFrame implements BrowseResult, OutputStreamResource, 
 	}
 
 	/**
-	 * @see com.lowagie.swing.browse.BrowseResult#setFile(java.io.File)
+	 * @see com.lowagie.swing.files.BrowseResult#setFile(java.io.File)
 	 */
 	public void setFile(File file) {
 		// left pane
@@ -230,7 +230,7 @@ public class Rups extends JFrame implements BrowseResult, OutputStreamResource, 
 	/**
 	 * Writes the PDF file that is being edited in this application to
 	 * an OutputStream.
-	 * @see com.lowagie.swing.browse.OutputStreamResource#writeTo(java.io.OutputStream)
+	 * @see com.lowagie.swing.files.OutputStreamResource#writeTo(java.io.OutputStream)
 	 */
 	public void writeTo(OutputStream os) throws IOException {
 		try {

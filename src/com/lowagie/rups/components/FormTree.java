@@ -40,7 +40,7 @@ import com.lowagie.rups.interfaces.PdfTreeNodeSelector;
 import com.lowagie.rups.nodetypes.FormTreeNode;
 import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
 import com.lowagie.rups.nodetypes.XfaTreeNode;
-import com.lowagie.swing.browse.OutputStreamResource;
+import com.lowagie.swing.files.OutputStreamResource;
 import com.lowagie.text.pdf.PdfName;
 
 /**

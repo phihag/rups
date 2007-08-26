@@ -44,11 +44,11 @@ import javax.swing.tree.DefaultTreeModel;
 import com.lowagie.rups.components.XfaTree;
 import com.lowagie.rups.components.io.TextAreaOutputStream;
 import com.lowagie.rups.nodetypes.XdpTreeNode;
-import com.lowagie.swing.browse.BrowseResult;
-import com.lowagie.swing.browse.FileChooserAction;
-import com.lowagie.swing.browse.FileResource;
-import com.lowagie.swing.browse.OutputStreamResource;
-import com.lowagie.swing.browse.SaveAction;
+import com.lowagie.swing.files.BrowseResult;
+import com.lowagie.swing.files.FileChooserAction;
+import com.lowagie.swing.files.FileResource;
+import com.lowagie.swing.files.OutputStreamResource;
+import com.lowagie.swing.files.SaveAction;
 import com.lowagie.swing.helpers.Utilities;
 
 import org.dom4j.Document;

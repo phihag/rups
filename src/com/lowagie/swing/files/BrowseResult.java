@@ -24,38 +24,18 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.swing.browse.filters;
+package com.lowagie.swing.files;
 
 import java.io.File;
 
-import javax.swing.filechooser.FileFilter;
-
 /**
- * Filters PDF files in a JFileChooser.
+ * Implemented by objects that expect you to browse for a file.
  */
-public class PdfFilter extends FileFilter {
-
-	public static PdfFilter INSTANCE = new PdfFilter();
-	
-    /**
-     *
-     * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
-     * @param f File
-     * @return boolean
-     */
-    public boolean accept(File f) {
-		if (f.isDirectory()) return true;
-		if (f.getName().toLowerCase().endsWith(".pdf")) return true;
-		return false;
-	}
-
-    /**
-     *
-     * @see javax.swing.filechooser.FileFilter#getDescription()
-     * @return String
-     */
-    public String getDescription() {
-		return "*.pdf PDF files";
-	}
-
+public interface BrowseResult {
+	/**
+	 * Forwards the file that was selected in a FileChooserAction
+	 * to the object waiting for you to chose a file.
+	 * @param file	the file you chose.
+	 */
+	public void setFile(File file);
 }

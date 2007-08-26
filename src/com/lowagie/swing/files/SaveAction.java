@@ -24,18 +24,46 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.swing.browse;
+package com.lowagie.swing.files;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.FileOutputStream;
+
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
+
 
 /**
- * Implemented by objects that expect you to browse for a file.
+ * This class is able to save a resource to a file.
  */
-public interface BrowseResult {
+public class SaveAction extends FileChooserAction implements BrowseResult {
+
+	/** A serial version UID. */
+	private static final long serialVersionUID = 3922521788445479080L;
+	/** The class that is able to write its XFA resource to an OutputStream. */
+	protected OutputStreamResource resource;
+	
 	/**
-	 * Forwards the file that was selected in a FileChooserAction
-	 * to the object waiting for you to chose a file.
-	 * @param file	the file you chose.
+	 * Creates the action that can save an XFA resource.
+	 * @param	xfa	the class that can write its XFA resource to an OutputStream
 	 */
-	public void setFile(File file);
+	public SaveAction(OutputStreamResource resource, FileFilter filter) {
+		super(null, "Save", filter, true);
+		this.resource = resource;
+		this.result = this;
+	}
+	
+	/**
+	 * Writes the XFA resource to a file.
+	 * @param	file	the file to which the XFA resource is saved.
+	 */
+	public void setFile(File file) {
+		try {
+			resource.writeTo(new FileOutputStream(file));
+			resource.setFile(file);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+		}
+	}
 }

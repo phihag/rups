@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.swing.browse;
+package com.lowagie.swing.files;
 
 import java.io.IOException;
 import java.io.OutputStream;

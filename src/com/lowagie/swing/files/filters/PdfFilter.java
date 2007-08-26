@@ -24,36 +24,38 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.swing.browse;
+package com.lowagie.swing.files.filters;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 
+import javax.swing.filechooser.FileFilter;
 
 /**
- * 
+ * Filters PDF files in a JFileChooser.
  */
-public class FileResource implements OutputStreamResource {
+public class PdfFilter extends FileFilter {
 
-	protected File file;
+	public static PdfFilter INSTANCE = new PdfFilter();
 	
-	public FileResource(File file) {
-		this.file = file;
-	}
-	
-	public void writeTo(OutputStream os) throws IOException {
-		FileInputStream fis = new FileInputStream(file);
-		byte[] snippet = new byte[1024];
-		int bytesread;
-		while ((bytesread = fis.read(snippet)) > 0) {
-			os.write(snippet, 0, bytesread);
-		}
+    /**
+     *
+     * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
+     * @param f File
+     * @return boolean
+     */
+    public boolean accept(File f) {
+		if (f.isDirectory()) return true;
+		if (f.getName().toLowerCase().endsWith(".pdf")) return true;
+		return false;
 	}
 
-	public void setFile(File file) {
-		this.file = file;
+    /**
+     *
+     * @see javax.swing.filechooser.FileFilter#getDescription()
+     * @return String
+     */
+    public String getDescription() {
+		return "*.pdf PDF files";
 	}
 
 }
