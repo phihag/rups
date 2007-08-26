@@ -37,10 +37,10 @@ import com.lowagie.rups.Ruxfa;
 import com.lowagie.rups.components.models.PdfTreeCellRenderer;
 import com.lowagie.rups.factories.TreeNodeFactory;
 import com.lowagie.rups.interfaces.PdfTreeNodeSelector;
-import com.lowagie.rups.interfaces.XfaInterface;
 import com.lowagie.rups.nodetypes.FormTreeNode;
 import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
 import com.lowagie.rups.nodetypes.XfaTreeNode;
+import com.lowagie.swing.browse.OutputStreamResource;
 import com.lowagie.text.pdf.PdfName;
 
 /**
@@ -169,8 +169,8 @@ public class FormTree extends JTree implements TreeSelectionListener {
 		if (tree == null)
 			return;
 		FormTreeNode selectednode = (FormTreeNode)this.getLastSelectedPathComponent();
-		if (selectednode instanceof XfaInterface && ruxfa != null) {
-			ruxfa.loadXfa((XfaInterface)selectednode);
+		if (selectednode instanceof OutputStreamResource && ruxfa != null) {
+			ruxfa.loadXfa((OutputStreamResource)selectednode);
 			ruxfa.setVisible(true);
 		}
 		PdfObjectTreeNode node = selectednode.getCorrespondingPdfObjectNode();

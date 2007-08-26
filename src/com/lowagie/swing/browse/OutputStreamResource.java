@@ -24,29 +24,21 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.rups.components.io;
+package com.lowagie.swing.browse;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 
-import com.lowagie.rups.interfaces.XfaInterface;
-import com.lowagie.swing.browse.BrowseResult;
 
-public class XfaFileSaver implements BrowseResult {
-
-	protected XfaInterface xfa;
-	
-	public XfaFileSaver(XfaInterface xfa) {
-		this.xfa = xfa;
-	}
-	
-	public void setFile(File file) {
-		try {
-			xfa.writeTo(new FileOutputStream(file), null);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
+/**
+ * An object that implements this interface is a resource that
+ * can be written to an OutputStream.
+ */
+public interface OutputStreamResource extends BrowseResult {
+	/**
+	 * Writes a resource to an OutputStream.
+	 * @param os	the OutputStream to which the XML is written.
+	 * @throws IOException	usual exception when there's a problem writing to an OutputStream
+	 */
+	public void writeTo(OutputStream os) throws IOException;
 }

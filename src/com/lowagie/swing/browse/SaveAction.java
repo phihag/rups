@@ -24,24 +24,46 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.rups.interfaces;
+package com.lowagie.swing.browse;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.FileOutputStream;
+
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
+
 
 /**
- * An object that implements the XfaInterface can write (part of) an
- * XFA resource to an OutputStream.
+ * This class is able to save a resource to a file.
  */
-public interface XfaInterface {
+public class SaveAction extends FileChooserAction implements BrowseResult {
+
+	/** A serial version UID. */
+	private static final long serialVersionUID = 3922521788445479080L;
+	/** The class that is able to write its XFA resource to an OutputStream. */
+	protected OutputStreamResource resource;
+	
 	/**
-	 * Writes (part of) an XFA resource to an OutputStream.
-	 * If key is <code>null</code>, the complete resource is written;
-	 * if key refers to an individual package, this package only is
-	 * written to the OutputStream.
-	 * @param os	the OutputStream to which the XML is written.
-	 * @param key	the key of an individual package (can be null if the complete XML file is needed)
-	 * @throws IOException	usual exception when there's a problem writing to an OutputStream
+	 * Creates the action that can save an XFA resource.
+	 * @param	xfa	the class that can write its XFA resource to an OutputStream
 	 */
-	public void writeTo(OutputStream os, String key) throws IOException;
+	public SaveAction(OutputStreamResource resource, FileFilter filter) {
+		super(null, "Save", filter, true);
+		this.resource = resource;
+		this.result = this;
+	}
+	
+	/**
+	 * Writes the XFA resource to a file.
+	 * @param	file	the file to which the XFA resource is saved.
+	 */
+	public void setFile(File file) {
+		try {
+			resource.writeTo(new FileOutputStream(file));
+			resource.setFile(file);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+		}
+	}
 }

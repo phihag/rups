@@ -31,6 +31,7 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -49,7 +50,6 @@ import com.lowagie.rups.components.PagesTable;
 import com.lowagie.rups.components.InfoPanel;
 import com.lowagie.rups.components.PdfTree;
 import com.lowagie.rups.components.XRefTable;
-import com.lowagie.rups.components.io.PdfFileSaver;
 import com.lowagie.rups.factories.IndirectObjectFactory;
 import com.lowagie.rups.factories.PdfWorker;
 import com.lowagie.rups.factories.TreeNodeFactory;
@@ -57,22 +57,31 @@ import com.lowagie.rups.nodetypes.PdfObjectTreeNode;
 import com.lowagie.rups.nodetypes.PdfTrailerTreeNode;
 import com.lowagie.swing.browse.BrowseResult;
 import com.lowagie.swing.browse.FileChooserAction;
+import com.lowagie.swing.browse.OutputStreamResource;
+import com.lowagie.swing.browse.SaveAction;
 import com.lowagie.swing.browse.filters.PdfFilter;
 import com.lowagie.swing.helpers.Utilities;
+import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfPageLabels;
 import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfStamper;
 import com.lowagie.text.pdf.RandomAccessFileOrArray;
 
 /**
  * An application that allows you to inspect the syntax of a PDF file.
  */
-public class Rups extends JFrame implements BrowseResult, TreeSelectionListener {
+public class Rups extends JFrame implements BrowseResult, OutputStreamResource, TreeSelectionListener {
 	
 	/**	a serial version id */
 	private static final long serialVersionUID = 4501670592786972072L;
 
+	// PDF
+	
 	/** The reader object for this PDF file. */
 	protected PdfReader reader = null;
+	
+	// menu
+	
 	/** The action to open a file chooser. */
 	protected FileChooserAction fileChooserAction;
 	/** The save button in the menu bar will be enabled and disabled. */
@@ -101,6 +110,8 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 	/** The panel that will contain info about a PDF object (card layout). */
 	protected InfoPanel info = new InfoPanel();
 	
+	// main method
+	
 	/**
 	 * Main method of this application.
 	 * @param args	no arguments needed
@@ -108,6 +119,8 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 	public static void main(String[] args) {
 		new Rups();
 	}
+	
+	// layout
 	
 	/**
 	 * Creates the JFrame.
@@ -133,7 +146,7 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
         
         // Frame title and menu
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("RUPS: Understanding PDF Syntax");
+        setTitle("RUPS: Read/Update PDF Syntax");
         setJMenuBar(getMenu());
         
         // overall lay-out
@@ -176,7 +189,7 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
         open.setAction(fileChooserAction);
         file.add(open);
         save = new JMenuItem("Save As");
-        save.setAction(new FileChooserAction(new PdfFileSaver(this), "Save As", PdfFilter.INSTANCE, true));
+        save.setAction(new SaveAction(this, PdfFilter.INSTANCE));
         save.setEnabled(false);
         file.add(save);
         bar.add(file);
@@ -210,6 +223,20 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 		} catch (IOException e) {
 			reader = null;
 	        save.setEnabled(false);
+			JOptionPane.showMessageDialog(this, e.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	/**
+	 * Writes the PDF file that is being edited in this application to
+	 * an OutputStream.
+	 * @see com.lowagie.swing.browse.OutputStreamResource#writeTo(java.io.OutputStream)
+	 */
+	public void writeTo(OutputStream os) throws IOException {
+		try {
+			PdfStamper stamper = new PdfStamper(reader, os);
+			stamper.close();
+		} catch (DocumentException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
 		}
 	}
@@ -252,13 +279,5 @@ public class Rups extends JFrame implements BrowseResult, TreeSelectionListener 
 				info.render(node.getPdfObject());
 			}
 		}
-	}
-
-	/**
-	 * Gets the PdfReader of the PDF file shown in the RUPS application.
-	 * @return	a PdfReader object
-	 */
-	public PdfReader getReader() {
-		return reader;
 	}
 }

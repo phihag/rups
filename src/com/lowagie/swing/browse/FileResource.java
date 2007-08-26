@@ -24,36 +24,36 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lowagie.rups.components.io;
+package com.lowagie.swing.browse;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
-import javax.swing.JOptionPane;
 
-import com.lowagie.rups.Rups;
-import com.lowagie.swing.browse.BrowseResult;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.pdf.PdfStamper;
+/**
+ * 
+ */
+public class FileResource implements OutputStreamResource {
 
-public class PdfFileSaver implements BrowseResult {
-
-	protected Rups rups;
+	protected File file;
 	
-	public PdfFileSaver(Rups rups) {
-		this.rups = rups;
+	public FileResource(File file) {
+		this.file = file;
+	}
+	
+	public void writeTo(OutputStream os) throws IOException {
+		FileInputStream fis = new FileInputStream(file);
+		byte[] snippet = new byte[1024];
+		int bytesread;
+		while ((bytesread = fis.read(snippet)) > 0) {
+			os.write(snippet, 0, bytesread);
+		}
 	}
 
 	public void setFile(File file) {
-		try {
-			PdfStamper stamper = new PdfStamper(rups.getReader(), new FileOutputStream(file));
-			stamper.close();
-			rups.setFile(file);
-		} catch (DocumentException e) {
-			JOptionPane.showMessageDialog(rups, e.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(rups, e.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-		}
+		this.file = file;
 	}
+
 }

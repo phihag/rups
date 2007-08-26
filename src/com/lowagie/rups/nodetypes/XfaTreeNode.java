@@ -26,11 +26,12 @@
 
 package com.lowagie.rups.nodetypes;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
 
-import com.lowagie.rups.interfaces.XfaInterface;
+import com.lowagie.swing.browse.OutputStreamResource;
 import com.lowagie.text.pdf.PRStream;
 import com.lowagie.text.pdf.PdfReader;
 
@@ -40,7 +41,7 @@ import com.lowagie.text.pdf.PdfReader;
  * This resource can be one XDP stream (in which case this root will only have one child)
  * or different streams with individual packets comprising the XML Data Package.
  */
-public class XfaTreeNode extends FormTreeNode implements XfaInterface {
+public class XfaTreeNode extends FormTreeNode implements OutputStreamResource {
 
 	/** A serial version UID. */
 	private static final long serialVersionUID = 2463297568233643790L;
@@ -77,33 +78,33 @@ public class XfaTreeNode extends FormTreeNode implements XfaInterface {
 	 * if key refers to an individual package, this package only is
 	 * written to the OutputStream.
 	 * @param os	the OutputStream to which the XML is written.
-	 * @param key	the key of an individual package (can be null if the complete XML file is needed)
 	 * @throws IOException	usual exception when there's a problem writing to an OutputStream
 	 */
-	public void writeTo(OutputStream os, String key) throws IOException {
+	public void writeTo(OutputStream os) throws IOException {
 		Enumeration children = this.children();
 		FormTreeNode node;
 		PRStream stream;
+		String key = null;
 		String tmp = null;
 		while (children.hasMoreElements()) {
 			node = (FormTreeNode) children.nextElement();
-			if (key == null || key.equals(node.getUserObject())) {
-				if (tmp != null) {
-					os.write(BOUNDARY_START);
-					os.write(tmp.getBytes());
-					os.write(BOUNDARY_MIDDLE);
-					os.write(((String)node.getUserObject()).getBytes());
-					os.write(BOUNDARY_END);
-				}
+			if (key != null) {
+				os.write(BOUNDARY_START);
+				os.write(key.getBytes());
+				os.write(BOUNDARY_MIDDLE);
 				tmp = (String)node.getUserObject();
-				stream = (PRStream)node.getCorrespondingPdfObjectNode().getPdfObject();
-				os.write(PdfReader.getStreamBytes(stream));
-				if (key != null) {
-					break;
-				}
+				os.write(tmp.getBytes());
+				os.write(BOUNDARY_END);
 			}
+			key = tmp;
+			stream = (PRStream)node.getCorrespondingPdfObjectNode().getPdfObject();
+			os.write(PdfReader.getStreamBytes(stream));
 		}
 		os.flush();
 		os.close();
+	}
+
+	public void setFile(File file) {
+		// do nothing
 	}
 }

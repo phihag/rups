@@ -43,12 +43,12 @@ import javax.swing.tree.DefaultTreeModel;
 
 import com.lowagie.rups.components.XfaTree;
 import com.lowagie.rups.components.io.TextAreaOutputStream;
-import com.lowagie.rups.components.io.XfaFileOpener;
-import com.lowagie.rups.components.io.XfaFileSaver;
-import com.lowagie.rups.interfaces.XfaInterface;
 import com.lowagie.rups.nodetypes.XdpTreeNode;
 import com.lowagie.swing.browse.BrowseResult;
 import com.lowagie.swing.browse.FileChooserAction;
+import com.lowagie.swing.browse.FileResource;
+import com.lowagie.swing.browse.OutputStreamResource;
+import com.lowagie.swing.browse.SaveAction;
 import com.lowagie.swing.helpers.Utilities;
 
 import org.dom4j.Document;
@@ -105,14 +105,14 @@ public class Ruxfa extends JFrame implements BrowseResult {
         
 		// title and menu
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        setTitle("RUXFA: Understanding XFA");
+        setTitle("RUXFA: Read/Update XFA");
         setJMenuBar(getMenu());
         
         // tabs
 		JTabbedPane tabs = new JTabbedPane();
 		this.getContentPane().add(tabs);
-		tabs.addTab("XML", null, Utilities.getScrollPane(textview), "Shows the original XFA resource (XML)");
 		tabs.addTab("Tree", null, Utilities.getScrollPane(treeview), "Shows the XFA resource in a tree view");
+		tabs.addTab("XML", null, Utilities.getScrollPane(textview), "Shows the original XFA resource (XML)");
 		
 	}
     
@@ -133,8 +133,13 @@ public class Ruxfa extends JFrame implements BrowseResult {
 		return bar;
 	}
 	
-	public void loadXfa(XfaInterface xfa) {
-		if (xfa == null) {
+	/**
+	 * Loads an XFA file from an OutputStreamResource.
+	 * This resource can be an XML file or a node in a RUPS application.
+	 * @param	resource	the XFA resource
+	 */
+	public void loadXfa(OutputStreamResource resource) {
+		if (resource == null) {
 			xfaDocument = null;
 			save.setEnabled(false);
 			treeview = new XfaTree();
@@ -142,15 +147,17 @@ public class Ruxfa extends JFrame implements BrowseResult {
 		}
 		else {
 			try {
+				// Is there a way to avoid loading everything in memory?
+				// Can we somehow get the XML from the PDF as an InputSource, Reader or InputStream?
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				xfa.writeTo(baos, null);
+				resource.writeTo(baos);
 				ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 				SAXReader reader = new SAXReader();
 				Document xfaDocument = reader.read(bais);
 				treeview.setModel(new DefaultTreeModel(new XdpTreeNode(xfaDocument)));
 				treeview.repaint();
 				save.setEnabled(true);
-				save.setAction(new FileChooserAction(new XfaFileSaver(xfa), "Save XFA file", null, true));
+				save.setAction(new SaveAction(resource, null));
 				OutputFormat format = new OutputFormat("   ", true);
 		        XMLWriter writer = new XMLWriter( new TextAreaOutputStream(textview), format );
 		        writer.write( xfaDocument );
@@ -163,6 +170,6 @@ public class Ruxfa extends JFrame implements BrowseResult {
 	}
 
 	public void setFile(File file) {
-		loadXfa(new XfaFileOpener(file));
+		loadXfa(new FileResource(file));
 	}
 }
