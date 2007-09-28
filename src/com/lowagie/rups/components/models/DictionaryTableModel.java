@@ -27,7 +27,6 @@
 package com.lowagie.rups.components.models;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -52,8 +51,8 @@ public class DictionaryTableModel extends AbstractTableModel {
 	 */
 	public DictionaryTableModel(PdfDictionary dictionary) {
 		this.dictionary = dictionary;
-		for (Iterator i = dictionary.getKeys().iterator(); i.hasNext(); )
-			this.keys.add((PdfName) i.next());
+		for (PdfName n: dictionary.getKeys())
+			this.keys.add(n);
 	}
 	
 	/**
