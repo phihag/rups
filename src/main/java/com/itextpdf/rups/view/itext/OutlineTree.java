@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: OutlineTree.java 4488 2010-04-24 19:41:06Z trumpetinc $
  *
  * Copyright 2007 Bruno Lowagie.
  *

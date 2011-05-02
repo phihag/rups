@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: PdfReaderController.java 4622 2010-11-12 09:02:44Z blowagie $
  *
  * Copyright 2007 Bruno Lowagie.
  *

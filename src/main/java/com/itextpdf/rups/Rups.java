@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: Rups.java 4754 2011-02-16 12:02:41Z redlab_b $
  *
  * Copyright 2007 Bruno Lowagie.
  *
@@ -7,12 +7,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -22,6 +22,7 @@ package com.itextpdf.rups;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.File;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -33,28 +34,37 @@ import com.itextpdf.rups.controller.RupsController;
  * of a PDF file.
  */
 public class Rups {
-	
+
 	// main method
 	/**
 	 * Main method. Starts the RUPS application.
 	 * @param	args	no arguments needed
 	 */
 	public static void main(String[] args) {
+		f = null;
+		if (args.length > 0) {
+			String pathToFile = args[0];
+			f = new File(pathToFile);
+			if (!f.canRead()) {
+				f = null;
+			}
+		}
 		SwingUtilities.invokeLater(
 		        new Runnable(){
 		            public void run() {
-		                startApplication();
+		                startApplication(f);
 		            }
 		        }
 		        );
 	}
-	
+
 	// methods
-	
+
     /**
      * Initializes the main components of the Rups application.
+     * @param f a file that should be opened on launch
      */
-    public static void startApplication() {
+    public static void startApplication(File f) {
     	// creates a JFrame
     	JFrame frame = new JFrame();
         // defines the size and location
@@ -70,11 +80,15 @@ public class Rups {
         frame.setJMenuBar(controller.getMenuBar());
         frame.getContentPane().add(controller.getMasterComponent(), java.awt.BorderLayout.CENTER);
 		frame.setVisible(true);
+		if (null != f) {
+			controller.loadFile(f);
+		}
     }
-	
+
 	// other member variables
-	
+
 	/** Serial Version UID. */
 	private static final long serialVersionUID = 4386633640535735848L;
+	private static File f;
 
 }

@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: FileChooserAction.java 4485 2010-04-23 16:05:30Z trumpetinc $
  *
  * Copyright 2007 Bruno Lowagie.
  *
