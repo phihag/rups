@@ -91,9 +91,7 @@ public class Rups {
     
 	// other member variables
 
-	/** Serial Version UID. */
-	private static final long serialVersionUID = 4386633640535735848L;
-	private static final String RUPS_VERSION = "1.0.1";
+	private static final String RUPS_VERSION = "1.0.2-SNAPSHOT";
 	private static File f;
 
 }
