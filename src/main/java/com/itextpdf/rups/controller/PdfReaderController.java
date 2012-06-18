@@ -37,7 +37,7 @@ import com.itextpdf.rups.view.itext.OutlineTree;
 import com.itextpdf.rups.view.itext.PagesTable;
 import com.itextpdf.rups.view.itext.PdfObjectPanel;
 import com.itextpdf.rups.view.itext.PdfTree;
-import com.itextpdf.rups.view.itext.StreamTextArea;
+import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
 import com.itextpdf.rups.view.itext.XRefTable;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
@@ -66,7 +66,7 @@ public class PdfReaderController extends Observable implements Observer {
 	/** Tabbed Pane containing other components. */
 	protected JTabbedPane editorTabs;
 	/** A panel that will show a stream. */
-	protected StreamTextArea streamArea;
+	protected SyntaxHighlightedStreamPane streamPane;
 
 	/** The factory producing tree nodes. */
 	protected TreeNodeFactory nodes;
@@ -99,10 +99,10 @@ public class PdfReaderController extends Observable implements Observer {
 		navigationTabs.addTab("XRef", null, new JScrollPane(xref), "Cross-reference table");
 		objectPanel = new PdfObjectPanel();
 		addObserver(objectPanel);
-		streamArea = new StreamTextArea();
-		addObserver(streamArea);
+		streamPane = new SyntaxHighlightedStreamPane();
+		addObserver(streamPane);
 		editorTabs = new JTabbedPane();
-		editorTabs.addTab("Stream", null, streamArea, "Stream");
+		editorTabs.addTab("Stream", null, streamPane, "Stream");
 		editorTabs.addTab("XFA", null, form.getXfaTextArea(), "XFA Form XML file");
 	}
 
@@ -143,12 +143,12 @@ public class PdfReaderController extends Observable implements Observer {
 	}
 
 	/**
-	 * Getter for the object that holds the TextArea
+	 * Getter for the object that holds the TextPane
 	 * with the content stream of a PdfStream object.
 	 * @return	a StreamTextArea
 	 */
-	public StreamTextArea getStreamArea() {
-		return streamArea;
+	public SyntaxHighlightedStreamPane getStreamPane() { 
+		return streamPane;
 	}
 
 	/**
@@ -206,9 +206,9 @@ public class PdfReaderController extends Observable implements Observer {
 	 */
 	public void render(PdfObject object) {
 		objectPanel.render(object);
-		streamArea.render(object);
+		streamPane.render(object);
 		if (object instanceof PRStream) {
-			editorTabs.setSelectedComponent(streamArea);
+			editorTabs.setSelectedComponent(streamPane);
 		}
 		else {
 			editorTabs.setSelectedIndex(editorTabs.getComponentCount() - 1);
