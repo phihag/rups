@@ -186,7 +186,6 @@ public class Console implements Observer {
                     String snippet = new String(buf, 0, len);
                     doc.insertString(doc.getLength(),
                                      snippet, attset);
-                    printStream.print(snippet);
                     textArea.setCaretPosition(textArea.getDocument().
                                               getLength());
                 } catch (BadLocationException ex) {
