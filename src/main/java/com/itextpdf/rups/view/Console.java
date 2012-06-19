@@ -1,5 +1,5 @@
 /*
- * $Id: Console.java 4483 2010-04-23 15:56:31Z trumpetinc $
+ * $Id$
  *
  * Copyright 2007 Bruno Lowagie.
  *

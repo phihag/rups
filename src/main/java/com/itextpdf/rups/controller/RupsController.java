@@ -1,5 +1,5 @@
 /*
- * $Id: RupsController.java 4754 2011-02-16 12:02:41Z redlab_b $
+ * $Id$
  *
  * Copyright 2007 Bruno Lowagie.
  *

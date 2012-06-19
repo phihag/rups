@@ -1,5 +1,5 @@
 /*
- * $Id: ObjectLoader.java 4520 2010-06-11 23:47:25Z trumpetinc $
+ * $Id$
  *
  * Copyright 2007 Bruno Lowagie.
  *

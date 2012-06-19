@@ -1,5 +1,5 @@
 /*
- * $Id: XfaTreeNode.java 4242 2010-01-02 23:22:20Z xlv $
+ * $Id$
  *
  * Copyright 2007 Bruno Lowagie.
  *

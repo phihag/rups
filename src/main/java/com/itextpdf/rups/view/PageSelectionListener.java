@@ -1,5 +1,5 @@
 /*
- * $Id: PageNavigationListener.java 4031 2009-07-23 11:09:59Z blowagie $
+ * $Id$
  *
  * Copyright 2007 Bruno Lowagie.
  *

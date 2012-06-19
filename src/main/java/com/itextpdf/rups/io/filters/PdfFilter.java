@@ -1,5 +1,5 @@
 /*
- * $Id: PdfFilter.java 4742 2011-02-10 16:11:15Z blowagie $
+ * $Id$
  *
  * Copyright 2007 Bruno Lowagie.
  *
