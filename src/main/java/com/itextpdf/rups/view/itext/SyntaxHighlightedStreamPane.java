@@ -1,7 +1,7 @@
 /*
- * $Id $
+ * $Id$
  *
- * Copyright 2007 Bruno Lowagie.
+ * Copyright 2012 Raf Hens.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
