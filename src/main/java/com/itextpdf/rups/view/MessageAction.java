@@ -26,7 +26,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
 
 import com.itextpdf.rups.Rups;
-import com.itextpdf.text.Document;
+import com.itextpdf.text.Version;
 
 public class MessageAction implements ActionListener {
 	
@@ -36,7 +36,7 @@ public class MessageAction implements ActionListener {
 			message = "RUPS is a tool by 1T3XT BVBA.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.1t3xt.com/ for more info.";
 		}
 		else if (RupsMenuBar.VERSION.equals(evt.getActionCommand())) {
-			message = "iText version: " + Document.getVersion() + "\nRUPS version: " + Rups.getVersion();
+			message = "iText version: " + Version.getInstance().getVersion() + "\nRUPS version: " + Rups.getVersion();
 		}
         JOptionPane.showMessageDialog(null, message);
 	}
