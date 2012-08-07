@@ -73,7 +73,7 @@ public class Rups {
         frame.setLocation((int)(screen.getWidth() * .05), (int)(screen.getHeight() * .05));
         frame.setResizable(true);
         // title bar
-        frame.setTitle("iText RUPS");
+        frame.setTitle("iText RUPS " + getVersion());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // the content
         RupsController controller = new RupsController(frame.getSize());
