@@ -35,11 +35,13 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
 import com.itextpdf.text.ExceptionConverter;
+import com.itextpdf.text.io.RandomAccessSourceFactory;
 import com.itextpdf.text.pdf.PRStream;
 import com.itextpdf.text.pdf.PRTokeniser;
 import com.itextpdf.text.pdf.PdfContentParser;
 import com.itextpdf.text.pdf.PdfObject;
 import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.RandomAccessFileOrArray;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 	
@@ -51,6 +53,9 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
 	/** Highlight operands according to their operator */
 	protected static boolean matchingOperands = false;
+	
+	/** Factory that allows you to create RandomAccessSource files */
+	protected static final RandomAccessSourceFactory RASF = new RandomAccessSourceFactory();
 	
 	/**
 	 * Constructs a SyntaxHighlightedStreamPane.
@@ -79,7 +84,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 			String newline = "\n";
 			try {
 				byte[] bb = PdfReader.getStreamBytes(stream);
-	            PRTokeniser tokeniser = new PRTokeniser(bb);
+	            PRTokeniser tokeniser = new PRTokeniser(new RandomAccessFileOrArray(RASF.createSource(bb)));
 	            PdfContentParser ps = new PdfContentParser(tokeniser);
 	            ArrayList<PdfObject> tokens = new ArrayList<PdfObject>();
 	            while (ps.parse(tokens).size() > 0){
