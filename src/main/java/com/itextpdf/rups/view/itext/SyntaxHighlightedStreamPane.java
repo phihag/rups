@@ -41,6 +41,7 @@ import com.itextpdf.text.pdf.PRTokeniser;
 import com.itextpdf.text.pdf.PdfContentParser;
 import com.itextpdf.text.pdf.PdfObject;
 import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfString;
 import com.itextpdf.text.pdf.RandomAccessFileOrArray;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
@@ -93,8 +94,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	                // operands are in front of their operator
 	                StringBuilder operandssb = new StringBuilder();
 	                for (int i = 0; i < tokens.size()-1; i++) {
-	                    operandssb.append(tokens.get(i));
-	                    operandssb.append(" ");
+	                	append(operandssb, tokens.get(i));
 	                }
 	                String operands = operandssb.toString();
 	                
@@ -117,6 +117,20 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 		}
 		text.repaint();
 		repaint();
+	}
+	
+	protected void append(StringBuilder sb, PdfObject obj) {
+		switch(obj.type()) {
+		case PdfObject.STRING:
+			PdfString str = (PdfString) obj;
+			sb.append(str.isHexWriting() ? "<" : "(");
+            sb.append(obj);
+			sb.append(str.isHexWriting() ? "> " : ") ");
+			break;
+		default:
+            sb.append(obj);
+            sb.append(" ");
+		}
 	}
 
 	/**
