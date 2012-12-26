@@ -192,7 +192,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     }
     private Boolean isXML(String eventDetail)
     {
-        if (eventDetail==null && eventDetail=="") return false; //+1 for unit tests :)
+        if (eventDetail == null || eventDetail=="")
+        	return false; //+1 for unit tests :)
         String detail = eventDetail.trim();
         if (!detail.startsWith("<") && !detail.endsWith(">")) return false;
         Document xml = new DOMDocument(detail);
@@ -334,7 +335,6 @@ class ColorTextPane extends JTextPane {
 		StyleContext sc = StyleContext.getDefaultStyleContext();
 		AttributeSet aset = SimpleAttributeSet.EMPTY;
 		// some default attributes
-        //System.out.println(s);
 		if (attr == null) {
 			attr = new HashMap<Object,Object>();
 			attr.put(StyleConstants.Foreground, Color.BLACK);

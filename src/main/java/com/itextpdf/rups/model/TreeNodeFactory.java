@@ -25,7 +25,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
-import com.itextpdf.rups.view.itext.treenodes.PdfPagesTreeNode;
+//import com.itextpdf.rups.view.itext.treenodes.PdfPagesTreeNode;
 import com.itextpdf.text.pdf.PdfArray;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfIndirectReference;
@@ -86,7 +86,7 @@ public class TreeNodeFactory {
 			PdfIndirectReference ref = (PdfIndirectReference)object;
 			leaf = getNode(ref.getNumber());
 			addNodes(node, leaf);
-			if (leaf instanceof PdfPagesTreeNode)
+			//if (leaf instanceof PdfPagesTreeNode)
 				expandNode(leaf);
 			return;
 		case PdfObject.ARRAY:

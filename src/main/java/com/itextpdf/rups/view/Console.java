@@ -82,7 +82,8 @@ public class Console implements Observer {
         // Set up System.out
         piOut = new PipedInputStream();
         poOut = new PipedOutputStream(piOut);
-
+        System.setOut(new PrintStream(poOut, true));
+        
         // Set up System.err
         piErr = new PipedInputStream();
         poErr = new PipedOutputStream(piErr);
