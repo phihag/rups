@@ -68,6 +68,7 @@ public class TextAreaOutputStream extends OutputStream {
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		String snippet = new String(b, off, len);
+        text.insert("test", offset);
 		text.insert(snippet, offset);
 		offset += len - off;
 	}

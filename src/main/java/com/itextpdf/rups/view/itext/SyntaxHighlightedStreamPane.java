@@ -20,32 +20,33 @@
 
 package com.itextpdf.rups.view.itext;
 
-import java.awt.Color;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.text.*;
 
 import com.itextpdf.text.ExceptionConverter;
 import com.itextpdf.text.io.RandomAccessSourceFactory;
-import com.itextpdf.text.pdf.PRStream;
-import com.itextpdf.text.pdf.PRTokeniser;
-import com.itextpdf.text.pdf.PdfContentParser;
-import com.itextpdf.text.pdf.PdfObject;
-import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.PdfString;
-import com.itextpdf.text.pdf.RandomAccessFileOrArray;
+import com.itextpdf.text.pdf.parser.PdfImageObject;
+import org.dom4j.dom.DOMDocument;
+import org.w3c.dom.Document;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
-	
+
 	/** The text pane with the content stream. */
 	protected ColorTextPane text;
 
@@ -54,10 +55,10 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
 	/** Highlight operands according to their operator */
 	protected static boolean matchingOperands = false;
-	
+
 	/** Factory that allows you to create RandomAccessSource files */
 	protected static final RandomAccessSourceFactory RASF = new RandomAccessSourceFactory();
-	
+
 	/**
 	 * Constructs a SyntaxHighlightedStreamPane.
 	 */
@@ -66,51 +67,109 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 		initAttributes();
 		text = new ColorTextPane();
 		setViewportView(text);
+
 	}
-	
+
 	/**
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public void update(Observable observable, Object obj) {
 		text.setText(null);
 	}
-	
 	/**
 	 * Renders the content stream of a PdfObject or empties the text area.
 	 * @param object	the object of which the content stream needs to be rendered
 	 */
 	public void render(PdfObject object) {
-		if (object instanceof PRStream) {
-			PRStream stream = (PRStream)object;
-			String newline = "\n";
-			try {
-				byte[] bb = PdfReader.getStreamBytes(stream);
-	            PRTokeniser tokeniser = new PRTokeniser(new RandomAccessFileOrArray(RASF.createSource(bb)));
-	            PdfContentParser ps = new PdfContentParser(tokeniser);
-	            ArrayList<PdfObject> tokens = new ArrayList<PdfObject>();
-	            while (ps.parse(tokens).size() > 0){
-	            	// operator is at the end
-	                String operator = (tokens.get(tokens.size()-1)).toString();
-	                // operands are in front of their operator
-	                StringBuilder operandssb = new StringBuilder();
-	                for (int i = 0; i < tokens.size()-1; i++) {
-	                	append(operandssb, tokens.get(i));
-	                }
-	                String operands = operandssb.toString();
-	                
-	                Map<Object, Object> attributes = attributemap.get(operator);
-	                Map<Object, Object> attributesOperands = null;
-	                if (matchingOperands)
-	                	attributesOperands = attributes;
+        if (object instanceof PRStream && !isXML(object.toString())) {
+            PRStream stream = (PRStream)object;
+            if(stream.get(PdfName.SUBTYPE) != PdfName.IMAGE){
+                String newline = "\n";
+                try {
+                    byte[] bb = PdfReader.getStreamBytes(stream);
 
-	                text.append(operands, attributesOperands);
-	                text.append(operator + newline, attributes);
-	            }
-	        }
-	        catch (Exception e) {
-	            throw new ExceptionConverter(e);
-	        }
-		}
+                    PRTokeniser tokeniser = new PRTokeniser(new RandomAccessFileOrArray(RASF.createSource(bb)));
+
+                    PdfContentParser ps = new PdfContentParser(tokeniser);
+                    ArrayList<PdfObject> tokens = new ArrayList<PdfObject>();
+                    text.setText("");
+                    while (ps.parse(tokens).size() > 0){
+                        // operator is at the end
+                        //System.out.println((tokens.get(tokens.size()-1)).toString());
+                        String operator = (tokens.get(tokens.size()-1)).toString();
+                        // operands are in front of their operator
+                        StringBuilder operandssb = new StringBuilder();
+                        for (int i = 0; i < tokens.size()-1; i++) {
+                            append(operandssb, tokens.get(i));
+                        }
+                        String operands = operandssb.toString();
+
+                        Map<Object, Object> attributes = attributemap.get(operator);
+                        Map<Object, Object> attributesOperands = null;
+                        if (matchingOperands)
+                            attributesOperands = attributes;
+
+
+                        text.append(operands, attributesOperands);
+                        text.append(operator + newline, attributes);
+                    }
+                }
+                catch (Exception e) {
+                    throw new ExceptionConverter(e);
+                }
+            }
+        }
+        if(object.type() == 7){
+            //Check if stream is image
+            PRStream stream = (PRStream)object;
+            if(stream.get(PdfName.SUBTYPE) == PdfName.IMAGE){
+                try {
+                    //Convert byte array back to Image
+                    if(!stream.get(PdfName.WIDTH).isNumber() && !stream.get(PdfName.HEIGHT).isNumber())return;
+                    PdfImageObject pimg = new PdfImageObject(stream);
+                    BufferedImage img = pimg.getBufferedImage();
+                    //Show image in textpane
+                    text.setText("");
+                    StyledDocument doc = (StyledDocument) text.getDocument();
+                    Style style = doc.addStyle("Image", null);
+                    StyleConstants.setIcon(style, new ImageIcon(img));
+
+
+                    try {
+                        doc.insertString(doc.getLength(), "ignored text", style);
+                        JButton saveImage = new JButton("Save Image");
+                        final BufferedImage saveImg = img;
+                        saveImage.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent event) {
+                                try {
+                                    FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
+                                    fileDialog.setFilenameFilter(new FilenameFilter() {
+                                        public boolean accept(File dir, String name) {
+                                            return name.endsWith(".jpg");
+                                        }
+                                    });
+                                    fileDialog.setFile("Untitled.jpg");
+                                    fileDialog.setVisible(true);
+                                    ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
+
+                                    //JOptionPane.showMessageDialog(text, "Image has been saved in c:\\\\");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+
+                                }
+                            }
+                        });
+                        text.append("\n", null);
+                        text.insertComponent(saveImage);
+                    } catch (BadLocationException e) {
+                        e.printStackTrace();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
 		else {
 			update(null, null);
 			return;
@@ -118,21 +177,36 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 		text.repaint();
 		repaint();
 	}
-	
-	protected void append(StringBuilder sb, PdfObject obj) {
-		switch(obj.type()) {
-		case PdfObject.STRING:
-			PdfString str = (PdfString) obj;
-			sb.append(str.isHexWriting() ? "<" : "(");
-            sb.append(obj);
-			sb.append(str.isHexWriting() ? "> " : ") ");
-			break;
-		default:
-            sb.append(obj);
-            sb.append(" ");
-		}
-	}
-
+    protected void append(StringBuilder sb, PdfObject obj) {
+        switch(obj.type()) {
+            case PdfObject.STRING:
+                PdfString str = (PdfString) obj;
+                sb.append(str.isHexWriting() ? "<" : "(");
+                sb.append(obj);
+                sb.append(str.isHexWriting() ? "> " : ") ");
+                break;
+            default:
+                sb.append(obj);
+                sb.append(" ");
+        }
+    }
+    private Boolean isXML(String eventDetail)
+    {
+        if (eventDetail==null && eventDetail=="") return false; //+1 for unit tests :)
+        String detail = eventDetail.trim();
+        if (!detail.startsWith("<") && !detail.endsWith(">")) return false;
+        Document xml = new DOMDocument(detail);
+        try
+        {
+            xml.getDoctype();
+            return true;
+        }
+        catch (Exception e)
+        {
+            System.out.println("Data NOT redacted. Caught {0} loading eventDetail {1} " +  e.getMessage() +" "+ eventDetail);
+            return false;
+        }
+    }
 	/**
 	 * Initialize the syntax highlighting attributes.
 	 * This could be read from a configuration file, but is hard coded for now
@@ -260,6 +334,7 @@ class ColorTextPane extends JTextPane {
 		StyleContext sc = StyleContext.getDefaultStyleContext();
 		AttributeSet aset = SimpleAttributeSet.EMPTY;
 		// some default attributes
+        //System.out.println(s);
 		if (attr == null) {
 			attr = new HashMap<Object,Object>();
 			attr.put(StyleConstants.Foreground, Color.BLACK);
