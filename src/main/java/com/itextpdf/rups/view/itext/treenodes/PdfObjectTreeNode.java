@@ -270,15 +270,19 @@ public class PdfObjectTreeNode extends IconTreeNode {
 	 * @return	the treepath to an ancestor
 	 */
 	public PdfObjectTreeNode getAncestor() {
-		if (isRecursive()) {
-			PdfObjectTreeNode node = this;
-			while(true) {
-				node = (PdfObjectTreeNode)node.getParent();
-				if (node.isIndirectReference() && node.getNumber() == getNumber()) {
-					return node;
-				}
-			}
-		}
+        try{
+		    if (isRecursive()) {
+			    PdfObjectTreeNode node = this;
+			    while(true) {
+				    node = (PdfObjectTreeNode)node.getParent();
+				    if (node.isIndirectReference() && node.getNumber() == getNumber()) {
+					    return node;
+                    }
+			    }
+		    }
+        }catch (NullPointerException ex){
+             System.out.println(this.toString() + " Parentnode is null.");
+        }
 		return null;
 	}
 

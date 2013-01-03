@@ -79,9 +79,11 @@ public class PdfTree extends JTree implements Observer {
 	 * @param	node	the node that has to be selected
 	 */
 	public void selectNode(PdfObjectTreeNode node) {
-		TreePath path = new TreePath(node.getPath());
-		setSelectionPath(path);
-		scrollPathToVisible(path);
+		if(node!=null) {
+            TreePath path = new TreePath(node.getPath());
+		    setSelectionPath(path);
+		    scrollPathToVisible(path);
+        }
 	}
 
 	/** a serial version UID */

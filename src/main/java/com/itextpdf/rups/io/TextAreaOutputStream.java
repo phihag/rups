@@ -49,7 +49,7 @@ public class TextAreaOutputStream extends OutputStream {
 	 * Clear the text area.
 	 */
 	public void clear() {
-		text.setText(null);
+		text.setText("");
 		offset = 0;
 	}
 	
@@ -67,9 +67,9 @@ public class TextAreaOutputStream extends OutputStream {
 	 */
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		String snippet = new String(b, off, len);
-        //solves a bug with some streams
-        text.insert("test", offset);
+		String snippet = new String(b, off, len, "UTF-8");
+        //solves a bug with some PDF's (XFA)
+        text.insert("    ", offset);
 		text.insert(snippet, offset);
 		offset += len - off;
 	}

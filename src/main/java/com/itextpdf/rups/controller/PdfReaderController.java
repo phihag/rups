@@ -250,7 +250,7 @@ public class PdfReaderController extends Observable implements Observer {
 			if (node.isIndirect()) {
 				xref.selectRowByReference(node.getNumber());
 				return;
-			}*/
+			} */
 			render(node.getPdfObject());
 		}
 	}
