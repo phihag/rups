@@ -32,8 +32,6 @@ import javax.swing.JTextArea;
 public class TextAreaOutputStream extends OutputStream {
 	/** The text area to which we want to write. */
 	protected JTextArea text;
-	/** Keeps track of the offset of the text in the text area. */
-	protected int offset;
 	
 	/**
 	 * Constructs a TextAreaOutputStream.
@@ -50,7 +48,6 @@ public class TextAreaOutputStream extends OutputStream {
 	 */
 	public void clear() {
 		text.setText("");
-		offset = 0;
 	}
 	
 	/**
@@ -68,10 +65,7 @@ public class TextAreaOutputStream extends OutputStream {
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		String snippet = new String(b, off, len, "UTF-8");
-        //solves a bug with some PDF's (XFA)
-        text.insert("    ", offset);
-		text.insert(snippet, offset);
-		offset += len - off;
+		text.append(snippet);
 	}
 
 	/**
