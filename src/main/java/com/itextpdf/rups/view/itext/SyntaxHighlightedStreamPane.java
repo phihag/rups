@@ -42,8 +42,6 @@ import com.itextpdf.text.exceptions.InvalidPdfException;
 import com.itextpdf.text.io.RandomAccessSourceFactory;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.parser.PdfImageObject;
-import org.dom4j.dom.DOMDocument;
-import org.w3c.dom.Document;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
