@@ -38,9 +38,9 @@ import javax.swing.*;
 import javax.swing.text.*;
 
 import com.itextpdf.text.ExceptionConverter;
+import com.itextpdf.text.exceptions.InvalidPdfException;
 import com.itextpdf.text.io.RandomAccessSourceFactory;
 import com.itextpdf.text.pdf.*;
-import com.itextpdf.text.pdf.PdfString;
 import com.itextpdf.text.pdf.parser.PdfImageObject;
 import org.dom4j.dom.DOMDocument;
 import org.w3c.dom.Document;
@@ -81,12 +81,13 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	 * @param object	the object of which the content stream needs to be rendered
 	 */
 	public void render(PdfObject object) {
-        if (object instanceof PRStream && !isXML(object.toString())) {
+        if (object instanceof PRStream) {
             PRStream stream = (PRStream)object;
             if(stream.get(PdfName.SUBTYPE) != PdfName.IMAGE){
                 String newline = "\n";
+                byte[] bb = null;
                 try {
-                    byte[] bb = PdfReader.getStreamBytes(stream);
+                    bb = PdfReader.getStreamBytes(stream);
 
                     PRTokeniser tokeniser = new PRTokeniser(new RandomAccessFileOrArray(RASF.createSource(bb)));
 
@@ -114,7 +115,10 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                         text.append(operator + newline, attributes);
                     }
                 }
-                catch (Exception e) {
+                catch (InvalidPdfException e) {
+                    text.setText(new String(bb));
+                }
+                catch (IOException e) {
                     throw new ExceptionConverter(e);
                 }
             }
@@ -190,24 +194,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 sb.append(" ");
         }
     }
-    private Boolean isXML(String eventDetail)
-    {
-        if (eventDetail == null || eventDetail=="")
-        	return false; //+1 for unit tests :)
-        String detail = eventDetail.trim();
-        if (!detail.startsWith("<") && !detail.endsWith(">")) return false;
-        Document xml = new DOMDocument(detail);
-        try
-        {
-            xml.getDoctype();
-            return true;
-        }
-        catch (Exception e)
-        {
-            System.out.println("Data NOT redacted. Caught {0} loading eventDetail {1} " +  e.getMessage() +" "+ eventDetail);
-            return false;
-        }
-    }
+
 	/**
 	 * Initialize the syntax highlighting attributes.
 	 * This could be read from a configuration file, but is hard coded for now
