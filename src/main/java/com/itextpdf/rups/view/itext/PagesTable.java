@@ -82,6 +82,7 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
 			PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.ROOT);
 			PdfPagesTreeNode pages = (PdfPagesTreeNode)factory.getChildNode(catalog, PdfName.PAGES);
 			if (pages == null) {
+				System.out.println("No page tree found");
 				return;
 			}
 			Enumeration<PdfObjectTreeNode> p = pages.depthFirstEnumeration();
