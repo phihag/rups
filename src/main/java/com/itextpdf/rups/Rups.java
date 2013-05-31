@@ -91,7 +91,7 @@ public class Rups {
     
 	// other member variables
 
-	private static final String RUPS_VERSION = "1.0.2";
+	private static final String RUPS_VERSION = "5.4.3-SNAPSHOT";
 	private static File f;
 
 }
