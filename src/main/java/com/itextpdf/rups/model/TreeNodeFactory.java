@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
+import com.itextpdf.rups.view.itext.treenodes.PdfPagesTreeNode;
 import com.itextpdf.text.pdf.PdfArray;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfIndirectReference;
@@ -69,7 +70,7 @@ public class TreeNodeFactory {
 		}
 		return node;
 	}
-	
+
 	/**
 	 * Creates the Child TreeNode objects for a PDF object TreeNode.
 	 * @param node	the parent node
@@ -79,57 +80,32 @@ public class TreeNodeFactory {
 			return;
 		}
 		PdfObject object = node.getPdfObject();
+		PdfObjectTreeNode leaf;
 		switch (object.type()) {
 		case PdfObject.INDIRECT:
 			PdfIndirectReference ref = (PdfIndirectReference)object;
-			PdfObjectTreeNode leafI = getNode(ref.getNumber());
-			addNodes(node, leafI);
-			expandNode(leafI);
+			leaf = getNode(ref.getNumber());
+			addNodes(node, leaf);
+			if (leaf instanceof PdfPagesTreeNode)
+				expandNode(leaf);
 			return;
 		case PdfObject.ARRAY:
 			PdfArray array = (PdfArray)object;
-			PdfObjectTreeNode leafA;
 			for (Iterator<PdfObject> it = array.listIterator(); it.hasNext(); ) {
-				leafA = PdfObjectTreeNode.getInstance(it.next());
-				addNodes(node, leafA);
-				expandNode(leafA);
+				leaf = PdfObjectTreeNode.getInstance(it.next());
+				addNodes(node, leaf);
+				expandNode(leaf);
 			}
 			return;
 		case PdfObject.DICTIONARY:
 		case PdfObject.STREAM:
-			expandDictionaryNode(node);
+			PdfDictionary dict = (PdfDictionary)object;
+			for (PdfName element : dict.getKeys()) {
+				leaf = PdfObjectTreeNode.getInstance(dict, element);
+				addNodes(node, leaf);
+				expandNode(leaf);
+			}
 			return;
-		}
-	}
-	
-	/**
-	 * Expands a dictionary node.
-	 * @param node	the parent node
-	 */
-	private void expandDictionaryNode(PdfObjectTreeNode node) {
-		PdfDictionary dict = new PdfDictionary();
-		dict.putAll((PdfDictionary)node.getPdfObject());
-		getPagesFirst(node, dict);
-		PdfObjectTreeNode leaf;
-		for (PdfName element : dict.getKeys()) {
-			leaf = PdfObjectTreeNode.getInstance(dict, element);
-			addNodes(node, leaf);
-			expandNode(leaf);
-		}
-	}
-	
-	/**
-	 * Processes the page tree first.
-	 * @param node	the parent node
-	 * @param dict	a copy of the dictionary object in the parent node
-	 */
-	private void getPagesFirst(PdfObjectTreeNode node, PdfDictionary dict) {
-		PdfDictionary pages = dict.getAsDict(PdfName.PAGES);
-		if (pages != null) {
-			PdfObjectTreeNode leaf = PdfObjectTreeNode.getInstance(dict, PdfName.PAGES);
-			addNodes(node, leaf);
-			expandNode(leaf);
-			dict.remove(PdfName.PAGES);
 		}
 	}
 
@@ -139,7 +115,7 @@ public class TreeNodeFactory {
 	 * @param	key		the key of the item corresponding with the node we need
 	 */
 	@SuppressWarnings("unchecked")
-        public PdfObjectTreeNode getChildNode(PdfObjectTreeNode node, PdfName key) {
+    public PdfObjectTreeNode getChildNode(PdfObjectTreeNode node, PdfName key) {
 		Enumeration<PdfObjectTreeNode> children = node.breadthFirstEnumeration();
 		PdfObjectTreeNode child;
 		while (children.hasMoreElements()) {
