@@ -139,7 +139,7 @@ public class TreeNodeFactory {
 	 * @param	key		the key of the item corresponding with the node we need
 	 */
 	@SuppressWarnings("unchecked")
-    public PdfObjectTreeNode getChildNode(PdfObjectTreeNode node, PdfName key) {
+        public PdfObjectTreeNode getChildNode(PdfObjectTreeNode node, PdfName key) {
 		Enumeration<PdfObjectTreeNode> children = node.breadthFirstEnumeration();
 		PdfObjectTreeNode child;
 		while (children.hasMoreElements()) {
