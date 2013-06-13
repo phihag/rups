@@ -34,10 +34,10 @@ import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfPageTreeNode;
-import com.itextpdf.rups.view.itext.treenodes.PdfPagesTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.rups.view.models.JTableAutoModel;
 import com.itextpdf.rups.view.models.JTableAutoModelInterface;
+import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfPageLabels;
 
@@ -66,7 +66,6 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
 	/**
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
-    @SuppressWarnings("unchecked")
     public void update(Observable observable, Object obj) {
 		if (obj == null) {
 			list = new ArrayList<PdfPageTreeNode>();
@@ -80,27 +79,20 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
 			TreeNodeFactory factory = loader.getNodes();
 			PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
 			PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.ROOT);
-			PdfPagesTreeNode pages = (PdfPagesTreeNode)factory.getChildNode(catalog, PdfName.PAGES);
-			if (pages == null) {
-				System.out.println("No page tree found");
-				return;
-			}
-			Enumeration<PdfObjectTreeNode> p = pages.depthFirstEnumeration();
-			PdfObjectTreeNode  child;
+			Enumeration<PdfPageTreeNode> p = new PageEnumerator((PdfDictionary)catalog.getPdfObject(), factory);
+			PdfPageTreeNode  child;
 			StringBuffer buf;
 			while (p.hasMoreElements()) {
 				child = p.nextElement();
-				if (child instanceof PdfPageTreeNode) {
-					buf = new StringBuffer("Page ");
-					buf.append(++i);
-					if (pagelabels != null) {
-						buf.append(" ( ");
-						buf.append(pagelabels[i - 1]);
-						buf.append(" )");
-					}
-					child.setUserObject(buf.toString());
-					list.add((PdfPageTreeNode)child);
+				buf = new StringBuffer("Page ");
+				buf.append(++i);
+				if (pagelabels != null) {
+					buf.append(" ( ");
+					buf.append(pagelabels[i - 1]);
+					buf.append(" )");
 				}
+				child.setUserObject(buf.toString());
+				list.add((PdfPageTreeNode)child);
 			}
 		}
 		setModel(new JTableAutoModel(this));
