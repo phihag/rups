@@ -20,16 +20,17 @@
 
 package com.itextpdf.rups.model;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.exceptions.BadPasswordException;
-import com.itextpdf.text.io.RandomAccessSource;
-import com.itextpdf.text.io.RandomAccessSourceFactory;
 import com.itextpdf.text.pdf.PdfReader;
 
 /**
@@ -62,11 +63,9 @@ public class PdfFile {
 	public PdfFile(File file) throws IOException, DocumentException {
 		if (file == null)
 			throw new IOException("No file selected.");
-		RandomAccessSourceFactory rasf = new RandomAccessSourceFactory();
-		RandomAccessSource ras = rasf.createBestSource(file.getAbsolutePath());
 		directory = file.getParentFile();
 		filename = file.getName();
-		readFile(ras);
+		readFile(new FileInputStream(file));
 	}
 	
 	/**
@@ -76,9 +75,7 @@ public class PdfFile {
 	 * @throws DocumentException 
 	 */
 	public PdfFile(byte[] file) throws IOException, DocumentException {
-		RandomAccessSourceFactory rasf = new RandomAccessSourceFactory();
-		RandomAccessSource ras = rasf.createSource(file);
-		readFile(ras);
+		readFile(new ByteArrayInputStream(file));
 	}
 	
 	/**
@@ -87,17 +84,17 @@ public class PdfFile {
 	 * @throws IOException
 	 * @throws DocumentException
 	 */
-	protected void readFile(RandomAccessSource ras) throws IOException, DocumentException {
+	protected void readFile(InputStream fis) throws IOException, DocumentException {
 		// reading the file into PdfReader
 		permissions = new Permissions();
 		try {
-			reader = new PdfReader(ras);
+			reader = new PdfReader(fis);
 			permissions.setEncrypted(false);
 		} catch(BadPasswordException bpe) {
 		    JPasswordField passwordField = new JPasswordField(32);
 		    JOptionPane.showConfirmDialog(null, passwordField, "Enter the User or Owner Password of this PDF file", JOptionPane.OK_CANCEL_OPTION);
 		    byte[] password = new String(passwordField.getPassword()).getBytes();
-		    reader = new PdfReader(ras, true, password);
+		    reader = new PdfReader(fis, password);
 		    permissions.setEncrypted(true);
 		    permissions.setCryptoMode(reader.getCryptoMode());
 		    permissions.setPermissions(reader.getPermissions());
