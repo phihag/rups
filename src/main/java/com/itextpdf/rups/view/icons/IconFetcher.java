@@ -26,7 +26,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 /**
- * Class that fetches the icons in com.itextpdf.trapeze.icons.
+ * Class that fetches the icons in com.itextpdf.rups.view.icons.
  */
 public class IconFetcher {
 	

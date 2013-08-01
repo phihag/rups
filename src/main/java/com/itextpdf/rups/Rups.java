@@ -28,6 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import com.itextpdf.rups.controller.RupsController;
+import com.itextpdf.text.Version;
 
 /**
  * iText RUPS is a tool that allows you to inspect the internal structure
@@ -73,7 +74,7 @@ public class Rups {
         frame.setLocation((int)(screen.getWidth() * .05), (int)(screen.getHeight() * .05));
         frame.setResizable(true);
         // title bar
-        frame.setTitle("iText RUPS " + getVersion());
+        frame.setTitle("iText RUPS " + Version.getInstance().getVersion());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // the content
         RupsController controller = new RupsController(frame.getSize());
@@ -84,14 +85,8 @@ public class Rups {
 			controller.loadFile(f);
 		}
     }
-
-    public static final String getVersion() {
-    	return RUPS_VERSION;
-    }
     
 	// other member variables
-
-	private static final String RUPS_VERSION = "5.4.3-SNAPSHOT";
 	private static File f;
 
 }

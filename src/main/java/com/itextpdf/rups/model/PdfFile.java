@@ -65,7 +65,12 @@ public class PdfFile {
 			throw new IOException("No file selected.");
 		directory = file.getParentFile();
 		filename = file.getName();
-		readFile(new FileInputStream(file));
+		try {
+			readFile(new FileInputStream(file), false);
+		}
+		catch(BadPasswordException bpe) {
+			readFile(new FileInputStream(file), true);
+		}
 	}
 	
 	/**
@@ -75,7 +80,12 @@ public class PdfFile {
 	 * @throws DocumentException 
 	 */
 	public PdfFile(byte[] file) throws IOException, DocumentException {
-		readFile(new ByteArrayInputStream(file));
+		try {
+			readFile(new ByteArrayInputStream(file), false);
+		}
+		catch(BadPasswordException bpe) {
+			readFile(new ByteArrayInputStream(file), true);
+		}
 	}
 	
 	/**
@@ -84,13 +94,10 @@ public class PdfFile {
 	 * @throws IOException
 	 * @throws DocumentException
 	 */
-	protected void readFile(InputStream fis) throws IOException, DocumentException {
+	protected void readFile(InputStream fis, boolean checkPass) throws IOException, DocumentException {
 		// reading the file into PdfReader
 		permissions = new Permissions();
-		try {
-			reader = new PdfReader(fis);
-			permissions.setEncrypted(false);
-		} catch(BadPasswordException bpe) {
+		if (checkPass) {
 		    JPasswordField passwordField = new JPasswordField(32);
 		    JOptionPane.showConfirmDialog(null, passwordField, "Enter the User or Owner Password of this PDF file", JOptionPane.OK_CANCEL_OPTION);
 		    byte[] password = new String(passwordField.getPassword()).getBytes();
@@ -103,8 +110,12 @@ public class PdfFile {
 		    	permissions.setUserPassword(reader.computeUserPassword());
 		    }
 		    else {
-		    	throw new IOException("You need the owner password of this file to open it in iText Trapeze.");
+		    	JOptionPane.showMessageDialog(null, "You opened the document using the user password instead of the owner password.");
 		    }
+		}
+		else {
+			reader = new PdfReader(fis);
+			permissions.setEncrypted(false);
 		}
 	}
 
