@@ -20,6 +20,28 @@
 
 package com.itextpdf.rups.view.itext;
 
+import com.itextpdf.text.ExceptionConverter;
+import com.itextpdf.text.exceptions.InvalidPdfException;
+import com.itextpdf.text.io.RandomAccessSourceFactory;
+import com.itextpdf.text.pdf.PRStream;
+import com.itextpdf.text.pdf.PRTokeniser;
+import com.itextpdf.text.pdf.PdfContentParser;
+import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfObject;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfString;
+import com.itextpdf.text.pdf.RandomAccessFileOrArray;
+import com.itextpdf.text.pdf.parser.PdfImageObject;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,16 +54,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.text.*;
-
-import com.itextpdf.text.ExceptionConverter;
-import com.itextpdf.text.exceptions.InvalidPdfException;
-import com.itextpdf.text.io.RandomAccessSourceFactory;
-import com.itextpdf.text.pdf.*;
-import com.itextpdf.text.pdf.parser.PdfImageObject;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
@@ -119,6 +131,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 catch (IOException e) {
                     throw new ExceptionConverter(e);
                 }
+
+                text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
             }
         }
         if(object.type() == 7){

@@ -33,6 +33,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.exceptions.BadPasswordException;
 import com.itextpdf.text.pdf.PdfReader;
 
+
 /**
  * Wrapper for both iText's PdfReader (referring to a PDF file to read)
  * and SUN's PDFFile (referring to the same PDF file to render).
@@ -90,7 +91,6 @@ public class PdfFile {
 	
 	/**
 	 * Does the actual reading of the file into PdfReader and PDFFile.
-	 * @param pdf	a Random Access File or Array
 	 * @throws IOException
 	 * @throws DocumentException
 	 */
@@ -98,8 +98,17 @@ public class PdfFile {
 		// reading the file into PdfReader
 		permissions = new Permissions();
 		if (checkPass) {
-		    JPasswordField passwordField = new JPasswordField(32);
-		    JOptionPane.showConfirmDialog(null, passwordField, "Enter the User or Owner Password of this PDF file", JOptionPane.OK_CANCEL_OPTION);
+		    final JPasswordField passwordField = new JPasswordField(32);
+
+		    JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
+                @Override
+                public void selectInitialValue() {
+                    passwordField.requestFocusInWindow();
+                }
+            };
+
+            pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
+
 		    byte[] password = new String(passwordField.getPassword()).getBytes();
 		    reader = new PdfReader(fis, password);
 		    permissions.setEncrypted(true);
