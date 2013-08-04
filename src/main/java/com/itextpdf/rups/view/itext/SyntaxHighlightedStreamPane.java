@@ -26,6 +26,7 @@ import com.itextpdf.text.io.RandomAccessSourceFactory;
 import com.itextpdf.text.pdf.PRStream;
 import com.itextpdf.text.pdf.PRTokeniser;
 import com.itextpdf.text.pdf.PdfContentParser;
+import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfObject;
 import com.itextpdf.text.pdf.PdfReader;
@@ -201,6 +202,16 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 sb.append(obj);
                 sb.append(str.isHexWriting() ? "> " : ") ");
                 break;
+            case PdfObject.DICTIONARY:
+            	PdfDictionary dict = (PdfDictionary)obj;
+            	sb.append("<<");
+            	for (PdfName key : dict.getKeys()) {
+            		sb.append(key);
+            		sb.append(" ");
+            		append(sb, dict.get(key));
+            	}
+            	sb.append(">> ");
+            	break;
             default:
                 sb.append(obj);
                 sb.append(" ");
