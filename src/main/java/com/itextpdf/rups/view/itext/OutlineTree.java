@@ -96,7 +96,7 @@ public class OutlineTree extends JTree implements TreeSelectionListener, Observe
 			loadOutline(factory, parent, next);
 		}
 	}
-
+	
 	/**
 	 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
 	 */

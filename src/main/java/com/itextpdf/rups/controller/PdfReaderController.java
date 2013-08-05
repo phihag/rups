@@ -37,6 +37,7 @@ import com.itextpdf.rups.view.itext.OutlineTree;
 import com.itextpdf.rups.view.itext.PagesTable;
 import com.itextpdf.rups.view.itext.PdfObjectPanel;
 import com.itextpdf.rups.view.itext.PdfTree;
+import com.itextpdf.rups.view.itext.StructureTree;
 import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
 import com.itextpdf.rups.view.itext.XRefTable;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -57,6 +58,8 @@ public class PdfReaderController extends Observable implements Observer {
 	protected PagesTable pages;
 	/** Treeview of the outlines. */
 	protected OutlineTree outlines;
+	/** Treeview of the structure. */
+	protected StructureTree structure;
 	/** Treeview of the form. */
 	protected FormTree form;
 	/** JTable corresponding with the CrossReference table. */
@@ -87,6 +90,8 @@ public class PdfReaderController extends Observable implements Observer {
 		addObserver(pages);
 		outlines = new OutlineTree(this);
 		addObserver(outlines);
+		structure = new StructureTree(this);
+		addObserver(structure);
 		form = new FormTree(this);
 		addObserver(form);
 		xref = new XRefTable(this);
@@ -94,6 +99,7 @@ public class PdfReaderController extends Observable implements Observer {
 		navigationTabs = new JTabbedPane();
 		navigationTabs.addTab("Pages", null, new JScrollPane(pages), "Pages");
 		navigationTabs.addTab("Outlines", null, new JScrollPane(outlines), "Outlines (Bookmarks)");
+		navigationTabs.addTab("Structure", null, new JScrollPane(structure), "Structure tree");
 		navigationTabs.addTab("Form", null, new JScrollPane(form), "Interactive Form");
 		navigationTabs.addTab("XFA", null, new JScrollPane(form.getXfaTree()), "Tree view of the XFA form");
 		navigationTabs.addTab("XRef", null, new JScrollPane(xref), "Cross-reference table");
