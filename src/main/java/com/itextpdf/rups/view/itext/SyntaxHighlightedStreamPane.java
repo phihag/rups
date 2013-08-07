@@ -20,6 +20,8 @@
 
 package com.itextpdf.rups.view.itext;
 
+import com.itextpdf.rups.view.contextmenu.ContextMenu;
+import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.text.ExceptionConverter;
 import com.itextpdf.text.exceptions.InvalidPdfException;
 import com.itextpdf.text.io.RandomAccessSourceFactory;
@@ -79,6 +81,9 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 		text = new ColorTextPane();
 		setViewportView(text);
 
+        JPopupMenu popupMenu = ContextMenu.getContextMenu(text);
+        text.add(popupMenu);
+        text.addMouseListener(new ContextMenuMouseListener(popupMenu, text));
 	}
 
 	/**
