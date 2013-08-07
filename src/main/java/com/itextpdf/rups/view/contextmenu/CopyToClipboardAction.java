@@ -1,24 +1,28 @@
 package com.itextpdf.rups.view.contextmenu;
 
 import javax.swing.*;
-import javax.swing.text.DefaultEditorKit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 
 /**
- * Subclass of DefaultEditorKit.CopyAction. actionPerformed is overridden to add selection logic:
- * If no text is selected, then the entire text is copied to the clipboard.
+ * Custom action to copy selected text to the system clipboard.
+ *
+ * @author Michael Demey
  */
-public class ContextMenuCopyAction extends DefaultEditorKit.CopyAction {
 
-    private JTextPane textPane;
+public class CopyToClipboardAction extends AbstractRupsAction {
 
-    public ContextMenuCopyAction(JTextPane textPane) {
-        this.textPane = textPane;
+    public CopyToClipboardAction(String name) {
+        super(name);
     }
 
-    @Override
+    public CopyToClipboardAction(String name, Component invoker) {
+        super(name, invoker);
+    }
+
     public void actionPerformed(ActionEvent e) {
         boolean nothingSelected = false;
+        JTextPane textPane = (JTextPane) invoker;
 
         if ( textPane.getSelectedText() == null || textPane.getSelectedText().isEmpty() ) {
             nothingSelected = true;

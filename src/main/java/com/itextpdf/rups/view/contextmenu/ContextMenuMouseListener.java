@@ -5,14 +5,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * TODO: Write Documentation
+ * Generic mouse listener that checks if a menu popup should be shown or not.
+ * A hook has been provided for your convenience: showPopupHook()
  *
  * @author Michael Demey
  */
 public class ContextMenuMouseListener extends MouseAdapter {
 
     private JPopupMenu popup;
-    private JComponent component;
+    protected JComponent component;
 
     public ContextMenuMouseListener(JPopupMenu popup, JComponent component) {
         this.popup = popup;
@@ -20,21 +21,22 @@ public class ContextMenuMouseListener extends MouseAdapter {
     }
 
     private void showMenuIfPopupTrigger(MouseEvent e) {
-        if (e.isPopupTrigger()) {
+        if (e.isPopupTrigger() && showPopupHook() ) {
             popup.show(component, e.getX() + 3, e.getY() + 3);
         }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        System.out.println("hello");
         showMenuIfPopupTrigger(e);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        System.out.println("hello");
         showMenuIfPopupTrigger(e);
     }
 
+    public boolean showPopupHook() {
+        return true;
+    }
 }

@@ -20,18 +20,13 @@
 
 package com.itextpdf.rups.controller;
 
-import java.util.Observable;
-import java.util.Observer;
-
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.event.TreeSelectionListener;
-
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
+import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
+import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.itext.FormTree;
 import com.itextpdf.rups.view.itext.OutlineTree;
 import com.itextpdf.rups.view.itext.PagesTable;
@@ -44,6 +39,11 @@ import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.text.pdf.PRStream;
 import com.itextpdf.text.pdf.PdfObject;
+
+import javax.swing.*;
+import javax.swing.event.TreeSelectionListener;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Controls the GUI components that get their content from iText's PdfReader.
@@ -84,8 +84,13 @@ public class PdfReaderController extends Observable implements Observer {
 	public PdfReaderController(TreeSelectionListener treeSelectionListener,
 			PageSelectionListener pageSelectionListener) {
 		pdfTree = new PdfTree();
+
 		pdfTree.addTreeSelectionListener(treeSelectionListener);
+        JPopupMenu menu = PdfTreeContextMenu.getPopupMenu(pdfTree);
+        pdfTree.add(menu);
+        pdfTree.addMouseListener(new PdfTreeContextMenuMouseListener(menu, pdfTree));
 		addObserver(pdfTree);
+
 		pages = new PagesTable(this, pageSelectionListener);
 		addObserver(pages);
 		outlines = new OutlineTree(this);
@@ -96,6 +101,7 @@ public class PdfReaderController extends Observable implements Observer {
 		addObserver(form);
 		xref = new XRefTable(this);
 		addObserver(xref);
+        
 		navigationTabs = new JTabbedPane();
 		navigationTabs.addTab("Pages", null, new JScrollPane(pages), "Pages");
 		navigationTabs.addTab("Outlines", null, new JScrollPane(outlines), "Outlines (Bookmarks)");
@@ -103,6 +109,7 @@ public class PdfReaderController extends Observable implements Observer {
 		navigationTabs.addTab("Form", null, new JScrollPane(form), "Interactive Form");
 		navigationTabs.addTab("XFA", null, new JScrollPane(form.getXfaTree()), "Tree view of the XFA form");
 		navigationTabs.addTab("XRef", null, new JScrollPane(xref), "Cross-reference table");
+        
 		objectPanel = new PdfObjectPanel();
 		addObserver(objectPanel);
 		streamPane = new SyntaxHighlightedStreamPane();

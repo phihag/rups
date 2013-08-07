@@ -10,7 +10,7 @@ import javax.swing.text.DefaultEditorKit;
  *
  * @author Michael Demey
  */
-public class ContextMenu {
+public class StreamPanelContextMenu {
 
     final static String COPY = "Copy";
     final static String SELECTALL = "Select All";
@@ -28,7 +28,7 @@ public class ContextMenu {
     public static JPopupMenu getContextMenu(final JTextPane textPane) {
         final JPopupMenu menu = new JPopupMenu();
         final JMenuItem copyItem = new JMenuItem();
-        copyItem.setAction(new ContextMenuCopyAction(textPane));
+        copyItem.setAction(new CopyToClipboardAction(COPY, textPane));
         copyItem.setText(COPY);
 
         final JMenuItem selectAllItem = new JMenuItem(SELECTALL);
