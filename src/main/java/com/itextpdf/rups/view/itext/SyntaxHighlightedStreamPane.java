@@ -203,9 +203,24 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         switch(obj.type()) {
             case PdfObject.STRING:
                 PdfString str = (PdfString) obj;
-                sb.append(str.isHexWriting() ? "<" : "(");
-                sb.append(obj);
-                sb.append(str.isHexWriting() ? "> " : ") ");
+                if (str.isHexWriting()) {
+                    sb.append("<");
+                    byte b[] = str.getBytes();
+                    int len = b.length;
+                    String hex;
+                    for (int k = 0; k < len; ++k) {
+                    	hex = Integer.toHexString(b[k]);
+                    	if (hex.length() % 2 == 1)
+                    		sb.append("0");
+                    	sb.append(hex);
+                    }
+                    sb.append("> ");
+                }
+                else {
+                    sb.append("(");
+                    sb.append(obj);
+                    sb.append(") ");
+                }
                 break;
             case PdfObject.DICTIONARY:
             	PdfDictionary dict = (PdfDictionary)obj;
