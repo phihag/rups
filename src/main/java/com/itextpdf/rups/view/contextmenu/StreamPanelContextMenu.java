@@ -35,7 +35,12 @@ public class StreamPanelContextMenu {
         selectAllItem.setAction(textPane.getActionMap().get(DefaultEditorKit.selectAllAction));
         selectAllItem.setText(SELECTALL);
 
+        JMenuItem saveToFile = new JMenuItem();
+        saveToFile.setText("Save to File");
+        saveToFile.setAction(new SaveToFileJTextPaneAction("Save to File", textPane));
+
         menu.add(copyItem);
+        menu.add(saveToFile);
         menu.add(new JSeparator());
         menu.add(selectAllItem);
 

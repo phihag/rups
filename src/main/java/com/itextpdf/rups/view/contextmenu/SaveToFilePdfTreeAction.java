@@ -15,23 +15,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
- * Custom action to save raw bytes of a stream to a file.
+ * Custom action to save raw bytes of a stream to a file from the PdfTree view.
  *
  * @author Michael Demey
  */
-public class SaveToFileAction extends AbstractRupsAction {
+public class SaveToFilePdfTreeAction extends AbstractRupsAction {
 
     private boolean saveRawBytes;
 
-    public SaveToFileAction(String name) {
+    public SaveToFilePdfTreeAction(String name) {
         super(name);
     }
 
-    public SaveToFileAction(String name, Component invoker) {
+    public SaveToFilePdfTreeAction(String name, Component invoker) {
         super(name, invoker);
     }
 
-    public SaveToFileAction(String name, Component invoker, boolean raw) {
+    public SaveToFilePdfTreeAction(String name, Component invoker, boolean raw) {
         super(name, invoker);
         saveRawBytes = raw;
     }
@@ -49,6 +49,7 @@ public class SaveToFileAction extends AbstractRupsAction {
         String path = null;
 
         if (choice == JFileChooser.APPROVE_OPTION) {
+            path = fileChooser.getSelectedFile().getPath();
 
             // get the stream
             PdfTree tree = (PdfTree) invoker;
@@ -57,7 +58,6 @@ public class SaveToFileAction extends AbstractRupsAction {
             PdfObjectTreeNode lastPath = (PdfObjectTreeNode) paths[0].getLastPathComponent();
             PdfObject object = lastPath.getPdfObject();
             PRStream stream = (PRStream) object;
-            path = fileChooser.getSelectedFile().getPath();
 
             // get the bytes and write away
             try {
@@ -75,7 +75,6 @@ public class SaveToFileAction extends AbstractRupsAction {
             } catch (IOException e1) {
                 e1.printStackTrace(); // TODO : Catch this exception properly
             }
-
         }
     }
 }

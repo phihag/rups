@@ -18,12 +18,12 @@ public class PdfTreeContextMenu {
         JPopupMenu popup = new JPopupMenu();
         JMenuItem saveRawToFile = new JMenuItem();
         saveRawToFile.setText("Save Raw Bytes to File");
-        saveRawToFile.setAction(new SaveToFileAction("Save Raw Bytes to File", component, true));
+        saveRawToFile.setAction(new SaveToFilePdfTreeAction("Save Raw Bytes to File", component, true));
         popup.add(saveRawToFile);
 
         JMenuItem saveToFile = new JMenuItem();
         saveToFile.setText("Save to File");
-        saveToFile.setAction(new SaveToFileAction("Save to File", component, false));
+        saveToFile.setAction(new SaveToFilePdfTreeAction("Save to File", component, false));
         popup.add(saveToFile);
         return popup;
     }
