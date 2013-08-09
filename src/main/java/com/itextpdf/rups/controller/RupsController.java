@@ -20,28 +20,25 @@
 
 package com.itextpdf.rups.controller;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.io.File;
-import java.io.IOException;
-import java.util.Observable;
-
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-
 import com.itextpdf.rups.io.FileChooserAction;
 import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.Console;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
+import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
+import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.text.DocumentException;
+
+import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Observable;
 
 /**
  * This class controls all the GUI components that are shown in
@@ -103,6 +100,7 @@ public class RupsController extends Observable
 		info.add(readerController.getObjectPanel(), JSplitPane.LEFT);
 		JTabbedPane editorPane = readerController.getEditorTabs();
 		JScrollPane cons = new JScrollPane(console.getTextArea());
+        console.getTextArea().addMouseListener(new ContextMenuMouseListener(ConsoleContextMenu.getPopupMenu(console.getTextArea()), cons));
 		editorPane.addTab("Console", null, cons, "Console window (System.out/System.err)");
 		editorPane.setSelectedComponent(cons);
 		info.add(editorPane, JSplitPane.RIGHT);
