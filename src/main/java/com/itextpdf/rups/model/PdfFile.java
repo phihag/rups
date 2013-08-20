@@ -64,6 +64,7 @@ public class PdfFile {
 	public PdfFile(File file) throws IOException, DocumentException {
 		if (file == null)
 			throw new IOException("No file selected.");
+		PdfReader.debugmode = true;
 		directory = file.getParentFile();
 		filename = file.getName();
 		try {
@@ -81,6 +82,7 @@ public class PdfFile {
 	 * @throws DocumentException 
 	 */
 	public PdfFile(byte[] file) throws IOException, DocumentException {
+		PdfReader.debugmode = true;
 		try {
 			readFile(new ByteArrayInputStream(file), false);
 		}
@@ -101,7 +103,9 @@ public class PdfFile {
 		    final JPasswordField passwordField = new JPasswordField(32);
 
 		    JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
-                @Override
+                private static final long serialVersionUID = 3695604506510737289L;
+
+				@Override
                 public void selectInitialValue() {
                     passwordField.requestFocusInWindow();
                 }
