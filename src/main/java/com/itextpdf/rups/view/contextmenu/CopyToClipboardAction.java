@@ -1,5 +1,5 @@
 /*
- * $Id: Console.java 34 2012-12-26 12:08:37Z blowagie $
+ * $Id$
  *
  * Copyright 2007 Bruno Lowagie.
  *
