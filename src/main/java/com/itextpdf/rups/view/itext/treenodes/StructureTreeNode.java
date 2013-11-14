@@ -43,7 +43,9 @@ public class StructureTreeNode extends IconTreeNode {
 		if (node.isDictionary()) {
 			PdfDictionary dict = (PdfDictionary)node.getPdfObject();
 			if (dict.get(PdfName.TYPE) == null || dict.checkType(PdfName.STRUCTELEM)) {
-				StringBuffer buf = new StringBuffer(dict.get(PdfName.S).toString());
+				StringBuffer buf = new StringBuffer();
+				if (dict.get(PdfName.S) != null)
+					buf.append(dict.get(PdfName.S).toString());
 				if (dict.get(PdfName.T) != null) {
 					buf.append(" -> ");
 					buf.append(dict.get(PdfName.T).toString());
