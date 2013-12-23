@@ -32,7 +32,7 @@ public class MessageAction implements ActionListener {
 	public void actionPerformed(ActionEvent evt) {
 		String message = "Unspecified message";
 		if (RupsMenuBar.ABOUT.equals(evt.getActionCommand())) {
-			message = "RUPS is a tool by 1T3XT BVBA.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.itextpdf.com/ for more info.";
+			message = "RUPS is a tool by iText Group NV.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.itextpdf.com/ for more info.";
 		}
 		else if (RupsMenuBar.VERSION.equals(evt.getActionCommand())) {
 			message = Version.getInstance().getVersion();
