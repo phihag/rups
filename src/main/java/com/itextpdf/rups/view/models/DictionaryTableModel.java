@@ -21,8 +21,8 @@
 package com.itextpdf.rups.view.models;
 
 import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfLiteral;
 import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfString;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -143,7 +143,7 @@ public class DictionaryTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    public void addRow(String keyField, String valueField) {
+    public void addRow(String keyField, String valueField, int type) {
         if ( keyField.startsWith("/")) {
             keyField = keyField.replace("/", "");
         }
@@ -151,7 +151,7 @@ public class DictionaryTableModel extends AbstractTableModel {
         PdfName newEntry = new PdfName(keyField);
 
         if ( !dictionary.contains(newEntry)) {
-            dictionary.put(newEntry, new PdfString(valueField));
+            dictionary.put(newEntry, new PdfLiteral(type, valueField));
             keys.add(newEntry);
         }
 

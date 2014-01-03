@@ -32,6 +32,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -121,7 +123,7 @@ public class PdfObjectPanel extends JPanel implements Observer {
 	/** a serial version id. */
 	private static final long serialVersionUID = 1302283071087762494L;
 
-    private static class JTableButtonMouseListener extends MouseAdapter {
+    private class JTableButtonMouseListener extends MouseAdapter {
         private final JTable table;
 
         public JTableButtonMouseListener(JTable table) {
@@ -143,12 +145,41 @@ public class PdfObjectPanel extends JPanel implements Observer {
                 String keyField = (String) table.getValueAt(selectedRow, 0);
                 String valueField = (String) table.getValueAt(selectedRow, 1);
 
-                if ( "".equalsIgnoreCase(keyField.trim()) || "".equalsIgnoreCase(valueField.trim())) {
+                if ( keyField  == null ) {
+                    return;
+                }
+
+                if ( "".equalsIgnoreCase(keyField.trim())) {
+                    return;
+                }
+
+                if ( valueField == null ) {
+                    valueField = "";
+                }
+
+                Map<String, Integer> choiceMap = new HashMap<String, Integer>(9);
+                choiceMap.put("Boolean", 1);
+                choiceMap.put("Number", 2);
+                choiceMap.put("String", 3);
+                choiceMap.put("Name", 4);
+                choiceMap.put("Array", 5);
+                choiceMap.put("Dictionary", 6);
+                choiceMap.put("Stream", 7);
+
+                String[] choices = new String[choiceMap.size()];
+                choiceMap.keySet().toArray(choices);
+
+                int defaultChoice = 0; // perhaps add some processing of the input to add to the UX
+
+                String input = (String) JOptionPane.showInputDialog(table, "What is the type of the new value?", "Value Type", JOptionPane.QUESTION_MESSAGE, null, choices, choices[defaultChoice]);
+
+                if ( input == null ) { // user cancelled input
                     return;
                 }
 
                 // call addRow
-                ((DictionaryTableModel) table.getModel()).addRow(keyField, valueField);
+                ((DictionaryTableModel) table.getModel()).addRow(keyField, valueField, choiceMap.get(input));
+
                 return;
             }
 
