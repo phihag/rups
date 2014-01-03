@@ -181,6 +181,7 @@ public class RupsController extends Observable
             }
             PdfStamper stamper = new PdfStamper(pdfFile.getPdfReader(), new FileOutputStream(file));
             stamper.close();
+            JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
         } catch (DocumentException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } catch (IOException ioe) {
