@@ -26,6 +26,7 @@ import com.itextpdf.rups.io.filters.PdfFilter;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -70,9 +71,9 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 		fileSaverAction = new FileChooserAction(observable, "Save As...", PdfFilter.INSTANCE, true);
 		MessageAction message = new MessageAction();
 		JMenu file = new JMenu(FILE_MENU);
-		addItem(file, OPEN, fileChooserAction);
+		addItem(file, OPEN, fileChooserAction, KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
 		addItem(file, CLOSE, new FileCloseAction(observable));
-        addItem(file, SAVE_AS, fileSaverAction);
+        addItem(file, SAVE_AS, fileSaverAction, KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
 		add(file);
         add(Box.createGlue());
         JMenu help = new JMenu(HELP_MENU);
@@ -107,11 +108,18 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	 * @param action	the action corresponding with the caption
 	 */
 	protected void addItem(JMenu menu, String caption, ActionListener action) {
-		JMenuItem item = new JMenuItem(caption);
-		item.addActionListener(action);
-		menu.add(item);
-		items.put(caption, item);
+        addItem(menu, caption, action, null);
 	}
+
+    protected void addItem(JMenu menu, String caption, ActionListener action, KeyStroke keyStroke) {
+        JMenuItem item = new JMenuItem(caption);
+        item.addActionListener(action);
+        if ( keyStroke != null ) {
+            item.setAccelerator(keyStroke);
+        }
+        menu.add(item);
+        items.put(caption, item);
+    }
 	
 	/**
 	 * Enables/Disables a series of menu items.
