@@ -22,6 +22,7 @@ package com.itextpdf.rups.view.models;
 
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfString;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -31,36 +32,43 @@ import java.util.ArrayList;
  */
 public class DictionaryTableModel extends AbstractTableModel {
 
-	/** A serial version UID. */
-	private static final long serialVersionUID = -8835275996639701776L;
-	/** The PDF dictionary. */
-	protected PdfDictionary dictionary;
-	/** An ArrayList with the dictionary keys. */
-	protected ArrayList<PdfName> keys = new ArrayList<PdfName>();
-
-	/**
-	 * Creates the TableModel.
-	 * @param dictionary the dictionary we want to show
-	 */
-	public DictionaryTableModel(PdfDictionary dictionary) {
-		this.dictionary = dictionary;
-		for (PdfName n : dictionary.getKeys())
-			this.keys.add(n);
-	}
+    /**
+     * A serial version UID.
+     */
+    private static final long serialVersionUID = -8835275996639701776L;
+    /**
+     * The PDF dictionary.
+     */
+    protected PdfDictionary dictionary;
+    /**
+     * An ArrayList with the dictionary keys.
+     */
+    protected ArrayList<PdfName> keys = new ArrayList<PdfName>();
 
     /**
-	 * @see javax.swing.table.TableModel#getColumnCount()
-	 */
-	public int getColumnCount() {
-		return 3;
-	}
+     * Creates the TableModel.
+     *
+     * @param dictionary the dictionary we want to show
+     */
+    public DictionaryTableModel(PdfDictionary dictionary) {
+        this.dictionary = dictionary;
+        for (PdfName n : dictionary.getKeys())
+            this.keys.add(n);
+    }
 
-	/**
-	 * @see javax.swing.table.TableModel#getRowCount()
-	 */
-	public int getRowCount() {
-		return dictionary.size() + 1;
-	}
+    /**
+     * @see javax.swing.table.TableModel#getColumnCount()
+     */
+    public int getColumnCount() {
+        return 3;
+    }
+
+    /**
+     * @see javax.swing.table.TableModel#getRowCount()
+     */
+    public int getRowCount() {
+        return dictionary.size() + 1;
+    }
 
 
     @Override
@@ -68,41 +76,64 @@ public class DictionaryTableModel extends AbstractTableModel {
         return columnIndex < 2;
     }
 
-	/**
-	 * @see javax.swing.table.TableModel#getValueAt(int, int)
-	 */
-	public Object getValueAt(int rowIndex, int columnIndex) {
+    /**
+     * @see javax.swing.table.TableModel#getValueAt(int, int)
+     */
+    public Object getValueAt(int rowIndex, int columnIndex) {
         int lastRow = keys.size();
 
         if (rowIndex == lastRow) {
-            return "";
+            if (columnIndex == 0) {
+                return tempKey;
+            }
+            if (columnIndex == 1) {
+                return tempValue;
+            }
         }
-		switch (columnIndex) {
-		case 0:
-			return keys.get(rowIndex);
-		case 1:
-			return dictionary.get(keys.get(rowIndex));
-		default:
-			return null;
-		}
-	}
 
-	/**
-	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
-	 */
-	@Override
+        switch (columnIndex) {
+            case 0:
+                return keys.get(rowIndex);
+            case 1:
+                return dictionary.get(keys.get(rowIndex));
+            default:
+                return null;
+        }
+    }
+
+    private String tempKey, tempValue;
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        int rowCount = getRowCount();
+
+        if (rowIndex == rowCount - 1) {
+            if (columnIndex == 0) {
+                tempKey = (String) aValue;
+            } else if (columnIndex == 1) {
+                tempValue = (String) aValue;
+            }
+        } else {
+            // TODO update existing values
+        }
+    }
+
+    /**
+     * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+     */
+    @Override
     public String getColumnName(int columnIndex) {
-		switch (columnIndex) {
-		case 0:
-			return "Key";
-		case 1:
-			return "Value";
-        case 2:
-            return "";
-		default:
-			return null;
-		}
-	}
+        switch (columnIndex) {
+            case 0:
+                return "Key";
+            case 1:
+                return "Value";
+            case 2:
+                return "";
+            default:
+                return null;
+        }
+    }
 
     public void removeRow(int rowNumber) {
         PdfName name = keys.get(rowNumber);
@@ -110,5 +141,23 @@ public class DictionaryTableModel extends AbstractTableModel {
         dictionary.remove(name);
 
         fireTableDataChanged();
+    }
+
+    public void addRow(String keyField, String valueField) {
+        if ( keyField.startsWith("/")) {
+            keyField = keyField.replace("/", "");
+        }
+
+        PdfName newEntry = new PdfName(keyField);
+
+        if ( !dictionary.contains(newEntry)) {
+            dictionary.put(newEntry, new PdfString(valueField));
+            keys.add(newEntry);
+        }
+
+        fireTableDataChanged();
+
+        tempKey = "";
+        tempValue = "";
     }
 }

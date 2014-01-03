@@ -138,8 +138,22 @@ public class PdfObjectPanel extends JPanel implements Observer {
             int selectedRow    = table.getSelectedRow();
             int rowCount = table.getRowCount();
 
+            if ( rowCount == 1 || rowCount -1 == selectedRow ) {
+                // check if two fields are empty or not
+                String keyField = (String) table.getValueAt(selectedRow, 0);
+                String valueField = (String) table.getValueAt(selectedRow, 1);
+
+                if ( "".equalsIgnoreCase(keyField.trim()) || "".equalsIgnoreCase(valueField.trim())) {
+                    return;
+                }
+
+                // call addRow
+                ((DictionaryTableModel) table.getModel()).addRow(keyField, valueField);
+                return;
+            }
+
             /*Checking the row or column is valid or not*/
-            if (selectedRow < table.getRowCount() && selectedRow >= 0 ) {
+            if (selectedRow < rowCount - 1 && selectedRow >= 0 ) {
                 ((DictionaryTableModel) table.getModel()).removeRow(selectedRow);
             }
         }
