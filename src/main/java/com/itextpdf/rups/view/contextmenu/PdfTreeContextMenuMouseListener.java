@@ -27,6 +27,7 @@ import com.itextpdf.text.pdf.PdfName;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import java.awt.event.MouseEvent;
 
 /**
  * Additional check to see whether the selected node is a Stream (and not an image stream)
@@ -41,11 +42,15 @@ public class PdfTreeContextMenuMouseListener extends ContextMenuMouseListener {
     }
 
     @Override
-    public boolean showPopupHook() {
+    public boolean showPopupHook(MouseEvent event) {
+        PdfTree tree = (PdfTree) component;
+
+        int row = tree.getClosestRowForLocation(event.getX(), event.getY());
+        tree.setSelectionRow(row);
         TreeSelectionModel selectionModel = ((PdfTree)component).getSelectionModel();
         TreePath[] paths = selectionModel.getSelectionPaths();
 
-        if ( paths.length < 1 ) {
+        if ( paths == null || paths.length < 1 ) {
             return false;
         }
 
@@ -55,6 +60,7 @@ public class PdfTreeContextMenuMouseListener extends ContextMenuMouseListener {
             return false;
         }
 
+        // Make sure the selected item isn't an image
         PRStream stream = (PRStream) lastPath.getPdfObject();
         return stream.get(PdfName.SUBTYPE) != PdfName.IMAGE;
     }
