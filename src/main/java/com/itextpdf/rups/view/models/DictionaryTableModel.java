@@ -20,6 +20,7 @@
 
 package com.itextpdf.rups.view.models;
 
+import com.itextpdf.text.pdf.PdfArray;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfLiteral;
 import com.itextpdf.text.pdf.PdfName;
@@ -130,7 +131,15 @@ public class DictionaryTableModel extends AbstractTableModel {
                 dictionary.remove(oldName);
                 dictionary.put(newName, pdfObject);
             } else {
-                // todo add value substitution
+                // todo improve situation here
+                String value = (String) aValue;
+                PdfObject pdfObject = dictionary.get(keys.get(rowIndex));
+
+                if ( pdfObject instanceof PdfArray) {
+                    value = value.replaceAll(",", "");
+                }
+
+                dictionary.put(keys.get(rowIndex), new PdfLiteral(value));
             }
         }
     }

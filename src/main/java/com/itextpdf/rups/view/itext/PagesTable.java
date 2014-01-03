@@ -20,14 +20,6 @@
 
 package com.itextpdf.rups.view.itext;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Observable;
-import java.util.Observer;
-
-import javax.swing.JTable;
-import javax.swing.event.ListSelectionEvent;
-
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
@@ -40,6 +32,13 @@ import com.itextpdf.rups.view.models.JTableAutoModelInterface;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfPageLabels;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * A JTable listing all the pages in a PDF file: the object number of each
@@ -153,9 +152,12 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
 		if (controller == null)
 			return;
 		if (getRowCount() > 0) {
-			controller.selectNode(list.get(getSelectedRow()));
-			if (listener != null)
-				listener.gotoPage(getSelectedRow() + 1);
+            int selectedRow = getSelectedRow();
+            if ( selectedRow >= 0 ) {
+                controller.selectNode(list.get(selectedRow));
+                if (listener != null)
+                    listener.gotoPage(getSelectedRow() + 1);
+            }
 		}
 	}
 
