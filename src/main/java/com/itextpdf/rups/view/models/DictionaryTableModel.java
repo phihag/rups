@@ -20,12 +20,11 @@
 
 package com.itextpdf.rups.view.models;
 
-import java.util.ArrayList;
-
-import javax.swing.table.AbstractTableModel;
-
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
+
+import javax.swing.table.AbstractTableModel;
+import java.util.ArrayList;
 
 /**
  * A TableModel in case we want to show a PDF dictionary in a JTable.
@@ -49,24 +48,35 @@ public class DictionaryTableModel extends AbstractTableModel {
 			this.keys.add(n);
 	}
 
-	/**
+    /**
 	 * @see javax.swing.table.TableModel#getColumnCount()
 	 */
 	public int getColumnCount() {
-		return 2;
+		return 3;
 	}
 
 	/**
 	 * @see javax.swing.table.TableModel#getRowCount()
 	 */
 	public int getRowCount() {
-		return dictionary.size();
+		return dictionary.size() + 1;
 	}
+
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return columnIndex < 2;
+    }
 
 	/**
 	 * @see javax.swing.table.TableModel#getValueAt(int, int)
 	 */
 	public Object getValueAt(int rowIndex, int columnIndex) {
+        int lastRow = keys.size();
+
+        if (rowIndex == lastRow) {
+            return "";
+        }
 		switch (columnIndex) {
 		case 0:
 			return keys.get(rowIndex);
@@ -87,9 +97,18 @@ public class DictionaryTableModel extends AbstractTableModel {
 			return "Key";
 		case 1:
 			return "Value";
+        case 2:
+            return "";
 		default:
 			return null;
 		}
 	}
 
+    public void removeRow(int rowNumber) {
+        PdfName name = keys.get(rowNumber);
+        keys.remove(rowNumber);
+        dictionary.remove(name);
+
+        fireTableDataChanged();
+    }
 }

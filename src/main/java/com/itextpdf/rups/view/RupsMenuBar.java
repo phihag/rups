@@ -20,19 +20,15 @@
 
 package com.itextpdf.rups.view;
 
+import com.itextpdf.rups.io.FileChooserAction;
+import com.itextpdf.rups.io.FileCloseAction;
+import com.itextpdf.rups.io.filters.PdfFilter;
+
+import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
-
-import javax.swing.Box;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-
-import com.itextpdf.rups.io.FileChooserAction;
-import com.itextpdf.rups.io.FileCloseAction;
-import com.itextpdf.rups.io.filters.PdfFilter;
 
 public class RupsMenuBar extends JMenuBar implements Observer {
 
@@ -42,6 +38,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	public static final String OPEN = "Open";
 	/** Caption for "Close file". */
 	public static final String CLOSE = "Close";
+    /** Caption for "Save as..." */
+    public static final String SAVE_AS = "Save as...";
 	/** Caption for the help menu. */
 	public static final String HELP_MENU = "Help";
 	/** Caption for "Help about". */
@@ -56,6 +54,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	protected Observable observable;
 	/** The action needed to open a file. */
 	protected FileChooserAction fileChooserAction;
+	/** The action needed to save a file. */
+	protected FileChooserAction fileSaverAction;
 	/** The HashMap with all the actions. */
 	protected HashMap<String, JMenuItem> items;
 	
@@ -67,10 +67,12 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 		this.observable = observable;
 		items = new HashMap<String, JMenuItem>();
 		fileChooserAction = new FileChooserAction(observable, "Open", PdfFilter.INSTANCE, false);
+		fileSaverAction = new FileChooserAction(observable, "Save As...", PdfFilter.INSTANCE, true);
 		MessageAction message = new MessageAction();
 		JMenu file = new JMenu(FILE_MENU);
 		addItem(file, OPEN, fileChooserAction);
 		addItem(file, CLOSE, new FileCloseAction(observable));
+        addItem(file, SAVE_AS, fileSaverAction);
 		add(file);
         add(Box.createGlue());
         JMenu help = new JMenu(HELP_MENU);

@@ -31,12 +31,14 @@ import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfStamper;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Observable;
 
@@ -133,7 +135,13 @@ public class RupsController extends Observable
 	public void notifyObservers(Object obj) {
 		if (obj instanceof FileChooserAction) {
 			File file = ((FileChooserAction)obj).getFile();
-			loadFile(file);
+
+            /* save check */
+            if ( ((FileChooserAction)obj).isNewFile() ) {
+                saveFile(file);
+            } else {
+                loadFile(file);
+            }
 			return;
 		}
 		if (obj instanceof FileCloseAction) {
@@ -161,6 +169,24 @@ public class RupsController extends Observable
 			JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
 		}
 	}
+
+    /**
+     * Saves the pdf to the disk
+     * @param file java.io.File file to save
+     */
+    public void saveFile(File file) {
+        try {
+            if ( !file.getName().endsWith(".pdf") ) {
+                file = new File(file.getPath() + ".pdf");
+            }
+            PdfStamper stamper = new PdfStamper(pdfFile.getPdfReader(), new FileOutputStream(file));
+            stamper.close();
+        } catch (DocumentException de) {
+            JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
 	// tree selection
 

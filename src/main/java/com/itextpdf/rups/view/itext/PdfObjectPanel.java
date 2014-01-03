@@ -19,20 +19,21 @@
  */
 
 package com.itextpdf.rups.view.itext;
-import java.awt.CardLayout;
-import java.util.Observable;
-import java.util.Observer;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-
+import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.models.DictionaryTableModel;
+import com.itextpdf.rups.view.models.DictionaryTableModelButton;
 import com.itextpdf.rups.view.models.PdfArrayTableModel;
 import com.itextpdf.text.pdf.PdfArray;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfObject;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Observable;
+import java.util.Observer;
 
 public class PdfObjectPanel extends JPanel implements Observer {
 
@@ -48,6 +49,8 @@ public class PdfObjectPanel extends JPanel implements Observer {
 	JTable table = new JTable();
 	/** The text pane with the info about a PDF object in the bottom panel. */
 	JTextArea text = new JTextArea();
+
+    private JTableButtonMouseListener mouseListener;
 	
 	/** Creates a PDF object panel. */
 	public PdfObjectPanel() {
@@ -63,6 +66,9 @@ public class PdfObjectPanel extends JPanel implements Observer {
 		JScrollPane text_scrollpane = new JScrollPane();
 		text_scrollpane.setViewportView(text);
 		add(text_scrollpane, TEXT);
+
+        mouseListener = new JTableButtonMouseListener(table);
+        table.addMouseListener(mouseListener);
 	}
 	
 	/**
@@ -96,6 +102,7 @@ public class PdfObjectPanel extends JPanel implements Observer {
 		case PdfObject.DICTIONARY:
 		case PdfObject.STREAM:
 			table.setModel(new DictionaryTableModel((PdfDictionary)object));
+            table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon("cross.png"), IconFetcher.getIcon("add.png")));
 			layout.show(this, TABLE);
 			this.repaint();
 			break;
@@ -114,4 +121,27 @@ public class PdfObjectPanel extends JPanel implements Observer {
 	/** a serial version id. */
 	private static final long serialVersionUID = 1302283071087762494L;
 
+    private static class JTableButtonMouseListener extends MouseAdapter {
+        private final JTable table;
+
+        public JTableButtonMouseListener(JTable table) {
+            this.table = table;
+        }
+
+        public void mouseClicked(MouseEvent e) {
+            int selectedColumn = table.getSelectedColumn();
+
+            if ( selectedColumn != 2 ) {
+                return;
+            }
+
+            int selectedRow    = table.getSelectedRow();
+            int rowCount = table.getRowCount();
+
+            /*Checking the row or column is valid or not*/
+            if (selectedRow < table.getRowCount() && selectedRow >= 0 ) {
+                ((DictionaryTableModel) table.getModel()).removeRow(selectedRow);
+            }
+        }
+    }
 }

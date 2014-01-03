@@ -20,13 +20,11 @@
 
 package com.itextpdf.rups.io;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Observable;
-
-import javax.swing.AbstractAction;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
 
 /**
  * Allows you to browse the file system and forwards the file
@@ -88,8 +86,16 @@ public class FileChooserAction extends AbstractAction {
 			file = fc.getSelectedFile();
 			lastSelectedFolder = fc.getCurrentDirectory();
 			observable.notifyObservers(this);
-		}
+        }
 	}
+
+    /**
+     * Is this FileChooserAction opened to save the file or to open one
+     * @return boolean
+     */
+    public boolean isNewFile() {
+        return newFile;
+    }
 
 	/** A serial version UID. */
 	private static final long serialVersionUID = 2225830878098387118L;
