@@ -23,6 +23,7 @@ package com.itextpdf.rups.view.models;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfLiteral;
 import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfObject;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -114,7 +115,23 @@ public class DictionaryTableModel extends AbstractTableModel {
                 tempValue = (String) aValue;
             }
         } else {
-            // TODO update existing values
+            if ( columnIndex == 0) {
+                String key = (String) aValue;
+
+                if ( key.contains("/")) {
+                    key = key.replace("/", "");
+                }
+
+                PdfName oldName = keys.get(rowIndex);
+                PdfName newName = new PdfName(key);
+                keys.set(rowIndex, newName);
+
+                PdfObject pdfObject = dictionary.get(oldName);
+                dictionary.remove(oldName);
+                dictionary.put(newName, pdfObject);
+            } else {
+                // todo add value substitution
+            }
         }
     }
 
