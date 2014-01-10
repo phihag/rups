@@ -72,7 +72,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 		MessageAction message = new MessageAction();
 		JMenu file = new JMenu(FILE_MENU);
 		addItem(file, OPEN, fileChooserAction, KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
-		addItem(file, CLOSE, new FileCloseAction(observable));
+		addItem(file, CLOSE, new FileCloseAction(observable), KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, SAVE_AS, fileSaverAction, KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
 		add(file);
         add(Box.createGlue());

@@ -20,18 +20,16 @@
 
 package com.itextpdf.rups.model;
 
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.exceptions.BadPasswordException;
+import com.itextpdf.text.pdf.PdfReader;
+
+import javax.swing.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.exceptions.BadPasswordException;
-import com.itextpdf.text.pdf.PdfReader;
 
 
 /**
@@ -53,6 +51,9 @@ public class PdfFile {
 	
 	/** The file permissions */
 	protected Permissions permissions = null;
+
+    /** Raw content string */
+    protected String rawContent = null;
 	
 	// constructors
 	/**
@@ -83,6 +84,8 @@ public class PdfFile {
 	 */
 	public PdfFile(byte[] file) throws IOException, DocumentException {
 		PdfReader.debugmode = true;
+        rawContent = new String(file, "Cp1252");
+
 		try {
 			readFile(new ByteArrayInputStream(file), false);
 		}
@@ -148,4 +151,16 @@ public class PdfFile {
 	public String getFilename(){
 	    return filename;
 	}
+
+    public String getRawContent() {
+        return rawContent;
+    }
+
+    public void setDirectory(File directory) {
+        this.directory = directory;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
 }

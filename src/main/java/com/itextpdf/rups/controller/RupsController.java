@@ -37,9 +37,12 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Observable;
 
 /**
@@ -54,6 +57,7 @@ public class RupsController extends Observable
 	/* file and controller */
 	/** The Pdf file that is currently open in the application. */
 	protected PdfFile pdfFile;
+    protected StringBuilder rawText = new StringBuilder();
 	/**
 	 * Object with the GUI components for iText.
 	 * @since	iText 5.0.0 (renamed from reader which was confusing because reader is normally used for a PdfReader instance)
@@ -157,10 +161,16 @@ public class RupsController extends Observable
 	 */
 	public void loadFile(File file) {
 		try {
-			pdfFile = new PdfFile(file);
-			setChanged();
+            byte[] contents = readFileToByteArray(file);
+
+            pdfFile = new PdfFile(contents);
+            pdfFile.setDirectory(file.getParentFile());
+            pdfFile.setFilename(file.getName());
+
+            setChanged();
 			super.notifyObservers(RupsMenuBar.OPEN);
 			readerController.startObjectLoader(pdfFile);
+            readerController.addNonObserverTabs(pdfFile);
 		}
 		catch(IOException ioe) {
 			JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
@@ -169,6 +179,42 @@ public class RupsController extends Observable
 			JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
 		}
 	}
+
+    /**
+     * Reads a File to a byte[]
+     *
+     * @param file java.io.File
+     * @return the file as a byte array
+     * @throws IOException
+     */
+    private byte[] readFileToByteArray(File file) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = null;
+        InputStream inputStream = null;
+        try {
+            byte[] buffer = new byte[4096];
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            inputStream = new FileInputStream(file);
+            int read = 0;
+            while ( (read = inputStream.read(buffer)) != -1 ) {
+                byteArrayOutputStream.write(buffer, 0, read);
+            }
+        } finally {
+            try {
+                if ( byteArrayOutputStream != null )
+                    byteArrayOutputStream.close();
+            } catch ( IOException e) {
+                e.printStackTrace(); // log to console
+            }
+
+            try {
+                if ( inputStream != null )
+                    inputStream.close();
+            } catch ( IOException e) {
+                e.printStackTrace(); // log to console
+            }
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
 
     /**
      * Saves the pdf to the disk
@@ -214,4 +260,12 @@ public class RupsController extends Observable
 		readerController.gotoPage(pageNumber);
 		return pageNumber;
 	}
+
+    /**
+     * Getter for the pdfFile
+     * @return pdfFile
+     */
+    public PdfFile getPdfFile() {
+        return pdfFile;
+    }
 }
