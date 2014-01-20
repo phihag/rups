@@ -109,7 +109,7 @@ public class PdfReaderController extends Observable implements Observer {
 		navigationTabs.addTab("Form", null, new JScrollPane(form), "Interactive Form");
 		navigationTabs.addTab("XFA", null, new JScrollPane(form.getXfaTree()), "Tree view of the XFA form");
 		navigationTabs.addTab("XRef", null, new JScrollPane(xref), "Cross-reference table");
-        
+
 		objectPanel = new PdfObjectPanel();
 		addObserver(objectPanel);
 		streamPane = new SyntaxHighlightedStreamPane();
@@ -251,6 +251,12 @@ public class PdfReaderController extends Observable implements Observer {
 		if (RupsMenuBar.CLOSE.equals(obj)) {
 			setChanged();
 			notifyObservers(null);
+
+
+            if ( navigationTabs.indexOfTab("PlainText") != -1 ) {
+                navigationTabs.removeTabAt(navigationTabs.indexOfTab("PlainText"));
+            }
+
 			nodes = null;
 		}
 		if (obj instanceof PdfObjectTreeNode) {
@@ -267,4 +273,14 @@ public class PdfReaderController extends Observable implements Observer {
 			render(node.getPdfObject());
 		}
 	}
+
+    /**
+     * Adds tabs that don't need to be an observer. Also removes them when they are present to avoid duplication.
+     * @param file
+     */
+    public void addNonObserverTabs(PdfFile file) {
+        if ( navigationTabs.indexOfTab("PlainText") != -1 )
+            navigationTabs.remove(navigationTabs.indexOfTab("PlainText"));
+        navigationTabs.addTab("PlainText", null, new JScrollPane(new JTextArea(file.getRawContent())), "Plain text representation of the PDF");
+    }
 }
