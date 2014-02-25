@@ -225,6 +225,7 @@ public class RupsController extends Observable
             if ( !file.getName().endsWith(".pdf") ) {
                 file = new File(file.getPath() + ".pdf");
             }
+            pdfFile.getPdfReader().removeUnusedObjects();
             PdfStamper stamper = new PdfStamper(pdfFile.getPdfReader(), new FileOutputStream(file));
             stamper.close();
             JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
