@@ -49,9 +49,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -99,17 +97,17 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	public void render(PdfObject object) {
         if (object instanceof PRStream) {
             PRStream stream = (PRStream)object;
-            if(stream.get(PdfName.SUBTYPE) != PdfName.IMAGE){
+            if(stream.get(PdfName.SUBTYPE) != PdfName.IMAGE && stream.get(PdfName.LENGTH1) == null ){
                 String newline = "\n";
                 byte[] bb = null;
                 try {
+                    text.setText("");
                     bb = PdfReader.getStreamBytes(stream);
 
                     PRTokeniser tokeniser = new PRTokeniser(new RandomAccessFileOrArray(RASF.createSource(bb)));
 
                     PdfContentParser ps = new PdfContentParser(tokeniser);
                     ArrayList<PdfObject> tokens = new ArrayList<PdfObject>();
-                    text.setText("");
                     while (ps.parse(tokens).size() > 0){
                         // operator is at the end
                         //System.out.println((tokens.get(tokens.size()-1)).toString());
@@ -188,6 +186,14 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                }
+            } else if ( stream.get(PdfName.LENGTH1) != null ) {
+                try {
+                    byte[] bytes = PdfReader.getStreamBytesRaw(stream);
+                    text.setText(new String(bytes));
+                    text.setCaretPosition(0);
+                } catch (IOException e) {
+                    text.setText("");
                 }
             }
 
