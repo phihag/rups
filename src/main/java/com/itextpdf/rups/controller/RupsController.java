@@ -222,6 +222,13 @@ public class RupsController extends Observable
      */
     public void saveFile(File file) {
         try {
+            if ( file.exists() ) {
+                int choice = JOptionPane.showConfirmDialog(null, "File already exists, would you like to overwrite file?", "Warning", JOptionPane.YES_NO_CANCEL_OPTION);
+                if ( choice == JOptionPane.NO_OPTION || choice == JOptionPane.CANCEL_OPTION ) {
+                    return;
+                }
+            }
+
             if ( !file.getName().endsWith(".pdf") ) {
                 file = new File(file.getPath() + ".pdf");
             }
@@ -229,6 +236,8 @@ public class RupsController extends Observable
             PdfStamper stamper = new PdfStamper(pdfFile.getPdfReader(), new FileOutputStream(file));
             stamper.close();
             JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
+
+            pdfFile = new PdfFile(file);
         } catch (DocumentException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } catch (IOException ioe) {
