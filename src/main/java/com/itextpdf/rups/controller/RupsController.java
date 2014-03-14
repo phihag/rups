@@ -37,13 +37,17 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
+import java.io.*;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.LinkedList;
 import java.util.Observable;
+import java.util.StringTokenizer;
 
 /**
  * This class controls all the GUI components that are shown in
@@ -89,6 +93,41 @@ public class RupsController extends Observable
 		masterComponent.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		masterComponent.setDividerLocation((int)(dimension.getHeight() * .70));
 		masterComponent.setDividerSize(2);
+        masterComponent.setDropTarget(new DropTarget() {
+            // drag and drop for opening files
+            public synchronized void drop(DropTargetDropEvent dtde) {
+                dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                Transferable t = dtde.getTransferable();
+                java.util.List<File> files = null;
+
+                try {
+                    if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                         files = (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+                    }
+                    if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) { // fix for Linux
+
+                        String urls = (String) t.getTransferData(DataFlavor.stringFlavor);
+                        files = new LinkedList();
+                        StringTokenizer tokens = new StringTokenizer(urls);
+                        while (tokens.hasMoreTokens()) {
+                            String urlString = tokens.nextToken();
+                            URL url = new URL(urlString);
+                            files.add(new File(URLDecoder.decode(url.getFile(), "UTF-8")));
+                        }
+                    }
+
+                    if ( files == null || files.size() != 1 ) {
+                        JOptionPane.showMessageDialog(masterComponent, "You can only open one file!", "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        loadFile(files.get(0));
+                    }
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(masterComponent, "Error opening file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+                dtde.dropComplete(true);
+            }
+        });
 
 		JSplitPane content = new JSplitPane();
 		masterComponent.add(content, JSplitPane.TOP);
