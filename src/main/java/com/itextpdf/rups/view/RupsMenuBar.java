@@ -20,13 +20,19 @@
 
 package com.itextpdf.rups.view;
 
+import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.io.FileChooserAction;
 import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
+import com.itextpdf.rups.model.PdfFile;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -37,6 +43,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	public static final String FILE_MENU = "File";
 	/** Caption for "Open file". */
 	public static final String OPEN = "Open";
+	/** Caption for "Open in PDF Viewer". */
+	public static final String OPENINVIEWER = "Open in PDF Viewer";
 	/** Caption for "Close file". */
 	public static final String CLOSE = "Close";
     /** Caption for "Save as..." */
@@ -64,7 +72,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	 * Creates a JMenuBar.
 	 * @param observable	the controller to which this menu bar is added
 	 */
-	public RupsMenuBar(Observable observable) {
+	public RupsMenuBar(final Observable observable) {
 		this.observable = observable;
 		items = new HashMap<String, JMenuItem>();
 		fileChooserAction = new FileChooserAction(observable, "Open", PdfFilter.INSTANCE, false);
@@ -74,6 +82,25 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 		addItem(file, OPEN, fileChooserAction, KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
 		addItem(file, CLOSE, new FileCloseAction(observable), KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, SAVE_AS, fileSaverAction, KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
+        file.addSeparator();
+        JMenu recentFilesSubMenu = new JMenu("Open in PDF Viewer Application");
+        addItem(file, OPENINVIEWER, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (Desktop.isDesktopSupported()) {
+                    try {
+                        PdfFile pdfFile = ((RupsController)observable).getPdfFile();
+                        if ( pdfFile != null ) {
+                            if ( pdfFile.getDirectory() != null ) {
+                                File myFile = new File(pdfFile.getDirectory(), pdfFile.getFilename());
+                                Desktop.getDesktop().open(myFile);
+                            }
+                        }
+                    } catch (IOException ex) {
+                        // no application registered for PDFs
+                    }
+                }
+            }
+        }, KeyStroke.getKeyStroke('O', KeyEvent.ALT_DOWN_MASK));
 		add(file);
         add(Box.createGlue());
         JMenu help = new JMenu(HELP_MENU);

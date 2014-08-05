@@ -54,46 +54,55 @@ import java.util.StringTokenizer;
  * the RUPS application: the menu bar, the panels,...
  */
 public class RupsController extends Observable
-	implements TreeSelectionListener, PageSelectionListener {
+        implements TreeSelectionListener, PageSelectionListener {
 
-	// member variables
+    // member variables
 
 	/* file and controller */
-	/** The Pdf file that is currently open in the application. */
-	protected PdfFile pdfFile;
+    /**
+     * The Pdf file that is currently open in the application.
+     */
+    protected PdfFile pdfFile;
     protected StringBuilder rawText = new StringBuilder();
-	/**
-	 * Object with the GUI components for iText.
-	 * @since	iText 5.0.0 (renamed from reader which was confusing because reader is normally used for a PdfReader instance)
-	 */
-	protected PdfReaderController readerController;
+    /**
+     * Object with the GUI components for iText.
+     *
+     * @since iText 5.0.0 (renamed from reader which was confusing because reader is normally used for a PdfReader instance)
+     */
+    protected PdfReaderController readerController;
 
 	/* main components */
-	/** The JMenuBar for the RUPS application. */
-	protected RupsMenuBar menuBar;
-	/** Contains all other components: the page panel, the outline tree, etc. */
-	protected JSplitPane masterComponent;
+    /**
+     * The JMenuBar for the RUPS application.
+     */
+    protected RupsMenuBar menuBar;
+    /**
+     * Contains all other components: the page panel, the outline tree, etc.
+     */
+    protected JSplitPane masterComponent;
 
 
-	// constructor
-	/**
-	 * Constructs the GUI components of the RUPS application.
-	 */
-	public RupsController(Dimension dimension) {
-		// creating components and controllers
+    // constructor
+
+    /**
+     * Constructs the GUI components of the RUPS application.
+     */
+    public RupsController(Dimension dimension) {
+        // creating components and controllers
         menuBar = new RupsMenuBar(this);
         addObserver(menuBar);
-		Console console = Console.getInstance();
-		addObserver(console);
-		readerController = new PdfReaderController(this, this);
-		addObserver(readerController);
+        Console console = Console.getInstance();
+        addObserver(console);
+        readerController = new PdfReaderController(this, this);
+        addObserver(readerController);
 
         // creating the master component
-		masterComponent = new JSplitPane();
-		masterComponent.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		masterComponent.setDividerLocation((int)(dimension.getHeight() * .70));
-		masterComponent.setDividerSize(2);
+        masterComponent = new JSplitPane();
+        masterComponent.setOrientation(JSplitPane.VERTICAL_SPLIT);
+        masterComponent.setDividerLocation((int) ( dimension.getHeight() * .70 ));
+        masterComponent.setDividerSize(2);
         masterComponent.setDropTarget(new DropTarget() {
+
             // drag and drop for opening files
             public synchronized void drop(DropTargetDropEvent dtde) {
                 dtde.acceptDrop(DnDConstants.ACTION_COPY);
@@ -102,12 +111,12 @@ public class RupsController extends Observable
 
                 try {
                     if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                         files = (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+                        files = (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
                     }
                     if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) { // fix for Linux
 
                         String urls = (String) t.getTransferData(DataFlavor.stringFlavor);
-                        files = new LinkedList();
+                        files = new LinkedList<File>();
                         StringTokenizer tokens = new StringTokenizer(urls);
                         while (tokens.hasMoreTokens()) {
                             String urlString = tokens.nextToken();
@@ -116,7 +125,7 @@ public class RupsController extends Observable
                         }
                     }
 
-                    if ( files == null || files.size() != 1 ) {
+                    if (files == null || files.size() != 1) {
                         JOptionPane.showMessageDialog(masterComponent, "You can only open one file!", "Error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         loadFile(files.get(0));
@@ -129,77 +138,81 @@ public class RupsController extends Observable
             }
         });
 
-		JSplitPane content = new JSplitPane();
-		masterComponent.add(content, JSplitPane.TOP);
-		JSplitPane info = new JSplitPane();
-		masterComponent.add(info, JSplitPane.BOTTOM);
+        JSplitPane content = new JSplitPane();
+        masterComponent.add(content, JSplitPane.TOP);
+        JSplitPane info = new JSplitPane();
+        masterComponent.add(info, JSplitPane.BOTTOM);
 
-		content.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-		content.setDividerLocation((int)(dimension.getWidth() * .6));
-		content.setDividerSize(1);
+        content.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+        content.setDividerLocation((int) ( dimension.getWidth() * .6 ));
+        content.setDividerSize(1);
         content.add(new JScrollPane(readerController.getPdfTree()), JSplitPane.LEFT);
-		content.add(readerController.getNavigationTabs(), JSplitPane.RIGHT);
+        content.add(readerController.getNavigationTabs(), JSplitPane.RIGHT);
 
-		info.setDividerLocation((int) (dimension.getWidth() * .3));
-		info.setDividerSize(1);
-		info.add(readerController.getObjectPanel(), JSplitPane.LEFT);
-		JTabbedPane editorPane = readerController.getEditorTabs();
-		JScrollPane cons = new JScrollPane(console.getTextArea());
+        info.setDividerLocation((int) ( dimension.getWidth() * .3 ));
+        info.setDividerSize(1);
+        info.add(readerController.getObjectPanel(), JSplitPane.LEFT);
+        JTabbedPane editorPane = readerController.getEditorTabs();
+        JScrollPane cons = new JScrollPane(console.getTextArea());
         console.getTextArea().addMouseListener(new ContextMenuMouseListener(ConsoleContextMenu.getPopupMenu(console.getTextArea()), cons));
-		editorPane.addTab("Console", null, cons, "Console window (System.out/System.err)");
-		editorPane.setSelectedComponent(cons);
-		info.add(editorPane, JSplitPane.RIGHT);
+        editorPane.addTab("Console", null, cons, "Console window (System.out/System.err)");
+        editorPane.setSelectedComponent(cons);
+        info.add(editorPane, JSplitPane.RIGHT);
+    }
 
-	}
+    /**
+     *
+     */
+    public RupsController(Dimension dimension, File f) {
+        this(dimension);
+        loadFile(f);
+    }
 
-	/**
-	 *
-	 */
-	public RupsController(Dimension dimension, File f) {
-		this(dimension);
-		loadFile(f);
-	}
-	/** Getter for the menubar. */
-	public RupsMenuBar getMenuBar() {
-		return menuBar;
-	}
+    /**
+     * Getter for the menubar.
+     */
+    public RupsMenuBar getMenuBar() {
+        return menuBar;
+    }
 
-	/** Getter for the master component. */
-	public Component getMasterComponent() {
-		return masterComponent;
-	}
+    /**
+     * Getter for the master component.
+     */
+    public Component getMasterComponent() {
+        return masterComponent;
+    }
 
-	// Observable
+    // Observable
 
-	/**
-	 * @see java.util.Observable#notifyObservers(java.lang.Object)
-	 */
-	@Override
-	public void notifyObservers(Object obj) {
-		if (obj instanceof FileChooserAction) {
-			File file = ((FileChooserAction)obj).getFile();
+    /**
+     * @see java.util.Observable#notifyObservers(java.lang.Object)
+     */
+    @Override
+    public void notifyObservers(Object obj) {
+        if (obj instanceof FileChooserAction) {
+            File file = ( (FileChooserAction) obj ).getFile();
 
             /* save check */
-            if ( ((FileChooserAction)obj).isNewFile() ) {
+            if (( (FileChooserAction) obj ).isNewFile()) {
                 saveFile(file);
             } else {
                 loadFile(file);
             }
-			return;
-		}
-		if (obj instanceof FileCloseAction) {
-			pdfFile = null;
-			setChanged();
-			super.notifyObservers(RupsMenuBar.CLOSE);
-			return;
-		}
-	}
+            return;
+        }
+        if (obj instanceof FileCloseAction) {
+            pdfFile = null;
+            setChanged();
+            super.notifyObservers(RupsMenuBar.CLOSE);
+            return;
+        }
+    }
 
-	/**
-	 * @param file the file to load
-	 */
-	public void loadFile(File file) {
-		try {
+    /**
+     * @param file the file to load
+     */
+    public void loadFile(File file) {
+        try {
             byte[] contents = readFileToByteArray(file);
 
             pdfFile = new PdfFile(contents);
@@ -207,17 +220,15 @@ public class RupsController extends Observable
             pdfFile.setFilename(file.getName());
 
             setChanged();
-			super.notifyObservers(RupsMenuBar.OPEN);
-			readerController.startObjectLoader(pdfFile);
+            super.notifyObservers(RupsMenuBar.OPEN);
+            readerController.startObjectLoader(pdfFile);
             readerController.addNonObserverTabs(pdfFile);
-		}
-		catch(IOException ioe) {
-			JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-		}
-		catch (DocumentException de) {
-			JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-		}
-	}
+        } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+        } catch (DocumentException de) {
+            JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     /**
      * Reads a File to a byte[]
@@ -234,22 +245,26 @@ public class RupsController extends Observable
             byteArrayOutputStream = new ByteArrayOutputStream();
             inputStream = new FileInputStream(file);
             int read = 0;
-            while ( (read = inputStream.read(buffer)) != -1 ) {
+            while (( read = inputStream.read(buffer) ) != - 1) {
                 byteArrayOutputStream.write(buffer, 0, read);
             }
         } finally {
             try {
-                if ( byteArrayOutputStream != null )
+                if (byteArrayOutputStream != null) {
                     byteArrayOutputStream.close();
-            } catch ( IOException e) {
-                e.printStackTrace(); // log to console
+                }
+            } catch (IOException e) {
+                // log to console
+                e.printStackTrace();
             }
 
             try {
-                if ( inputStream != null )
+                if (inputStream != null) {
                     inputStream.close();
-            } catch ( IOException e) {
-                e.printStackTrace(); // log to console
+                }
+            } catch (IOException e) {
+                // log to console
+                e.printStackTrace();
             }
         }
         return byteArrayOutputStream.toByteArray();
@@ -257,18 +272,19 @@ public class RupsController extends Observable
 
     /**
      * Saves the pdf to the disk
+     *
      * @param file java.io.File file to save
      */
     public void saveFile(File file) {
         try {
-            if ( file.exists() ) {
+            if (file.exists()) {
                 int choice = JOptionPane.showConfirmDialog(null, "File already exists, would you like to overwrite file?", "Warning", JOptionPane.YES_NO_CANCEL_OPTION);
-                if ( choice == JOptionPane.NO_OPTION || choice == JOptionPane.CANCEL_OPTION ) {
+                if (choice == JOptionPane.NO_OPTION || choice == JOptionPane.CANCEL_OPTION) {
                     return;
                 }
             }
 
-            if ( !file.getName().endsWith(".pdf") ) {
+            if (! file.getName().endsWith(".pdf")) {
                 file = new File(file.getPath() + ".pdf");
             }
             pdfFile.getPdfReader().removeUnusedObjects();
@@ -284,34 +300,35 @@ public class RupsController extends Observable
         }
     }
 
-	// tree selection
+    // tree selection
 
-	/**
-	 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
-	 */
-	public void valueChanged(TreeSelectionEvent evt) {
-		Object selectednode = readerController.getPdfTree().getLastSelectedPathComponent();
-		if (selectednode instanceof PdfTrailerTreeNode) {
-			menuBar.update(this, RupsMenuBar.FILE_MENU);
-			return;
-		}
-		if (selectednode instanceof PdfObjectTreeNode) {
-			readerController.update(this, selectednode);
-		}
-	}
+    /**
+     * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
+     */
+    public void valueChanged(TreeSelectionEvent evt) {
+        Object selectednode = readerController.getPdfTree().getLastSelectedPathComponent();
+        if (selectednode instanceof PdfTrailerTreeNode) {
+            menuBar.update(this, RupsMenuBar.FILE_MENU);
+            return;
+        }
+        if (selectednode instanceof PdfObjectTreeNode) {
+            readerController.update(this, selectednode);
+        }
+    }
 
-	// page navigation
+    // page navigation
 
-	/**
-	 * @see com.itextpdf.rups.view.PageSelectionListener#gotoPage(int)
-	 */
-	public int gotoPage(int pageNumber) {
-		readerController.gotoPage(pageNumber);
-		return pageNumber;
-	}
+    /**
+     * @see com.itextpdf.rups.view.PageSelectionListener#gotoPage(int)
+     */
+    public int gotoPage(int pageNumber) {
+        readerController.gotoPage(pageNumber);
+        return pageNumber;
+    }
 
     /**
      * Getter for the pdfFile
+     *
      * @return pdfFile
      */
     public PdfFile getPdfFile() {

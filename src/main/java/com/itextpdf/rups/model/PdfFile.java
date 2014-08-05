@@ -152,6 +152,10 @@ public class PdfFile {
 	    return filename;
 	}
 
+    public File getDirectory() {
+        return directory;
+    }
+
     public String getRawContent() {
         return rawContent;
     }
