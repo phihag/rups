@@ -120,7 +120,7 @@ public class PdfFile {
 		    reader = new PdfReader(fis, password);
 		    permissions.setEncrypted(true);
 		    permissions.setCryptoMode(reader.getCryptoMode());
-		    permissions.setPermissions(reader.getPermissions());
+		    permissions.setPermissions((int)reader.getPermissions());
 		    if (reader.isOpenedWithFullPermissions()) {
 		    	permissions.setOwnerPassword(password);
 		    	permissions.setUserPassword(reader.computeUserPassword());
