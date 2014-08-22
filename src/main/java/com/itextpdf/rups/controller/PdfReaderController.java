@@ -20,6 +20,7 @@
 
 package com.itextpdf.rups.controller;
 
+import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.TreeNodeFactory;
@@ -27,14 +28,7 @@ import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
-import com.itextpdf.rups.view.itext.FormTree;
-import com.itextpdf.rups.view.itext.OutlineTree;
-import com.itextpdf.rups.view.itext.PagesTable;
-import com.itextpdf.rups.view.itext.PdfObjectPanel;
-import com.itextpdf.rups.view.itext.PdfTree;
-import com.itextpdf.rups.view.itext.StructureTree;
-import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
-import com.itextpdf.rups.view.itext.XRefTable;
+import com.itextpdf.rups.view.itext.*;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.text.pdf.PRStream;
@@ -42,6 +36,7 @@ import com.itextpdf.text.pdf.PdfObject;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionListener;
+import java.awt.event.KeyListener;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -262,9 +257,23 @@ public class PdfReaderController extends Observable implements Observer {
 		if (obj instanceof PdfObjectTreeNode) {
 			PdfObjectTreeNode node = (PdfObjectTreeNode)obj;
 			nodes.expandNode(node);
-			if (node.isRecursive()) {
-				pdfTree.selectNode(node.getAncestor());
-				return;
+
+			if (node.isRecursive() ) {
+                boolean keyboardNav = false;
+
+                KeyListener[] listeners = pdfTree.getKeyListeners();
+
+                for (int i = 0; i < listeners.length; i++) {
+                    KeyListener listener = listeners[i];
+                    if (listener instanceof PdfTreeNavigationListener) {
+                        keyboardNav = ( (PdfTreeNavigationListener) listener ).isLastActionKeyboardNavigation();
+                    }
+                }
+
+                if ( !keyboardNav ) {
+                    pdfTree.selectNode(node.getAncestor());
+                    return;
+                }
 			}/*
 			if (node.isIndirect()) {
 				xref.selectRowByReference(node.getNumber());

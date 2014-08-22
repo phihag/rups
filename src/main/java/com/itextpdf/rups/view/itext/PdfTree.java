@@ -20,16 +20,16 @@
 
 package com.itextpdf.rups.view.itext;
 
-import java.util.Observable;
-import java.util.Observer;
-
-import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-
+import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * A JTree that shows the object hierarchy of a PDF document.
@@ -38,13 +38,16 @@ public class PdfTree extends JTree implements Observer {
 
 	/** The root of the PDF tree. */
 	protected PdfTrailerTreeNode root;
-	
-	/**
+
+    /**
 	 * Constructs a PDF tree.
 	 */
 	public PdfTree() {
 		super();
 		root = new PdfTrailerTreeNode();
+        PdfTreeNavigationListener listener = new PdfTreeNavigationListener();
+        addKeyListener(listener);
+        addMouseListener(listener);
 		setCellRenderer(new IconTreeCellRenderer());
 		update(null, null);
 	}
