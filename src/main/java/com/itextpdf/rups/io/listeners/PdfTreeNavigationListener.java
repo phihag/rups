@@ -11,43 +11,43 @@ import java.awt.event.MouseListener;
  */
 public class PdfTreeNavigationListener implements KeyListener, MouseListener {
 
-    private boolean keyboard = false;
+    private boolean arrowsUsedAsNavigation = false;
 
     public boolean isLastActionKeyboardNavigation() {
-        return keyboard;
+        return arrowsUsedAsNavigation;
     }
 
     /* Keyboard inputs */
     public void keyTyped(KeyEvent e) {
-        keyboard = true;
+        arrowsUsedAsNavigation = true;
     }
 
     public void keyPressed(KeyEvent e) {
-        keyboard = true;
+        arrowsUsedAsNavigation = true;
     }
 
     public void keyReleased(KeyEvent e) {
-        keyboard = true;
+        arrowsUsedAsNavigation = true;
     }
 
     /* Mouse inputs */
     public void mouseClicked(MouseEvent e) {
-        keyboard = false;
+        arrowsUsedAsNavigation = false;
     }
 
     public void mousePressed(MouseEvent e) {
-        keyboard = false;
+        arrowsUsedAsNavigation = false;
     }
 
     public void mouseReleased(MouseEvent e) {
-        keyboard = false;
+        arrowsUsedAsNavigation = false;
     }
 
     public void mouseEntered(MouseEvent e) {
-        keyboard = false;
+        arrowsUsedAsNavigation = false;
     }
 
     public void mouseExited(MouseEvent e) {
-        keyboard = false;
+        arrowsUsedAsNavigation = false;
     }
 }

@@ -20,6 +20,7 @@
 
 package com.itextpdf.rups.view.itext;
 
+import com.itextpdf.rups.io.listeners.PdfTreeExpansionListener;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -49,6 +50,7 @@ public class PdfTree extends JTree implements Observer {
         addKeyListener(listener);
         addMouseListener(listener);
 		setCellRenderer(new IconTreeCellRenderer());
+        addTreeExpansionListener(new PdfTreeExpansionListener());
 		update(null, null);
 	}
 	
