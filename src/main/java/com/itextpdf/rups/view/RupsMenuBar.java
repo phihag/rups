@@ -83,7 +83,6 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 		addItem(file, CLOSE, new FileCloseAction(observable), KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, SAVE_AS, fileSaverAction, KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
         file.addSeparator();
-        JMenu recentFilesSubMenu = new JMenu("Open in PDF Viewer Application");
         addItem(file, OPENINVIEWER, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (Desktop.isDesktopSupported()) {
@@ -154,6 +153,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	 */
 	protected void enableItems(boolean enabled) {
 		enableItem(CLOSE, enabled);
+        enableItem(SAVE_AS, enabled);
+        enableItem(OPENINVIEWER, enabled);
 	}
 	
 	/**
