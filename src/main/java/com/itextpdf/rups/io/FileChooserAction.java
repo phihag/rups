@@ -20,6 +20,8 @@
 
 package com.itextpdf.rups.io;
 
+import com.itextpdf.rups.controller.RupsController;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionEvent;
@@ -77,10 +79,10 @@ public class FileChooserAction extends AbstractAction {
 		}
 		int okCancel;
 		if (newFile) {
-			okCancel = fc.showSaveDialog(null);
+			okCancel = fc.showSaveDialog(((RupsController) observable).getMasterComponent());
 		}
 		else {
-			okCancel = fc.showOpenDialog(null);
+			okCancel = fc.showOpenDialog(((RupsController) observable).getMasterComponent());
 		}
 		if (okCancel == JFileChooser.APPROVE_OPTION) {
 			file = fc.getSelectedFile();

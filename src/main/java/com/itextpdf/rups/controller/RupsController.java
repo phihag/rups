@@ -28,6 +28,7 @@ import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
 import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
+import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.text.DocumentException;
@@ -36,6 +37,7 @@ import com.itextpdf.text.pdf.PdfStamper;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -262,7 +264,7 @@ public class RupsController extends Observable
     public void saveFile(File file) {
         try {
             if ( file.exists() ) {
-                int choice = JOptionPane.showConfirmDialog(null, "File already exists, would you like to overwrite file?", "Warning", JOptionPane.YES_NO_CANCEL_OPTION);
+                int choice = JOptionPane.showConfirmDialog(masterComponent, "File already exists, would you like to overwrite file?", "Warning", JOptionPane.YES_NO_CANCEL_OPTION);
                 if ( choice == JOptionPane.NO_OPTION || choice == JOptionPane.CANCEL_OPTION ) {
                     return;
                 }
@@ -275,6 +277,7 @@ public class RupsController extends Observable
             PdfStamper stamper = new PdfStamper(pdfFile.getPdfReader(), new FileOutputStream(file));
             stamper.close();
             JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
+
 
             loadFile(file);
         } catch (DocumentException de) {
