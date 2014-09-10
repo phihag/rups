@@ -1,11 +1,13 @@
 package com.itextpdf.rups.io.listeners;
 
 import com.itextpdf.rups.view.itext.PdfTree;
+import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
@@ -18,7 +20,9 @@ public class PdfTreeExpansionListener implements TreeExpansionListener {
         PdfTree  tree = (PdfTree) event.getSource();
         DefaultMutableTreeNode node = ((DefaultMutableTreeNode) event.getPath().getLastPathComponent());
         if ( node.getChildCount() == 1 ) {
-            tree.expandPath(new TreePath(( (DefaultTreeModel) tree.getModel() ).getPathToRoot(node.getChildAt(0))));
+            TreeNode child = node.getChildAt(0);
+            tree.selectNode((PdfObjectTreeNode) child);
+            tree.expandPath(new TreePath(((DefaultTreeModel) tree.getModel() ).getPathToRoot(child)));
         }
     }
 
