@@ -274,11 +274,7 @@ public class PdfReaderController extends Observable implements Observer {
                     pdfTree.selectNode(node.getAncestor());
                     return;
                 }
-			}/*
-			if (node.isIndirect()) {
-				xref.selectRowByReference(node.getNumber());
-				return;
-			} */
+			}
 			render(node.getPdfObject());
 		}
 	}
