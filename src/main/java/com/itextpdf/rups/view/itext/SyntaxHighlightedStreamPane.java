@@ -20,41 +20,24 @@
 
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
-import com.itextpdf.text.ExceptionConverter;
+import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
 import com.itextpdf.text.exceptions.InvalidPdfException;
 import com.itextpdf.text.io.RandomAccessSourceFactory;
-import com.itextpdf.text.pdf.PRStream;
-import com.itextpdf.text.pdf.PRTokeniser;
-import com.itextpdf.text.pdf.PdfContentParser;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfObject;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfString;
-import com.itextpdf.text.pdf.RandomAccessFileOrArray;
+import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.parser.PdfImageObject;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.*;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
@@ -97,7 +80,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	public void render(PdfObject object) {
         if (object instanceof PRStream) {
             PRStream stream = (PRStream)object;
-            if(stream.get(PdfName.SUBTYPE) != PdfName.IMAGE && stream.get(PdfName.LENGTH1) == null ){
+            if( stream.get(PdfName.LENGTH1) == null ){
                 String newline = "\n";
                 byte[] bb = null;
                 try {
@@ -130,10 +113,14 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     }
                 }
                 catch (InvalidPdfException e) {
-                    text.setText(new String(bb));
+                    if ( bb != null ) {
+                        text.setText(new String(bb));
+                    } else {
+                        text.setText(e.getMessage());
+                    }
                 }
                 catch (IOException e) {
-                    throw new ExceptionConverter(e);
+                    //throw new ExceptionConverter(e);
                 }
 
                 text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
@@ -148,45 +135,48 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     if(!stream.get(PdfName.WIDTH).isNumber() && !stream.get(PdfName.HEIGHT).isNumber())return;
                     PdfImageObject pimg = new PdfImageObject(stream);
                     BufferedImage img = pimg.getBufferedImage();
-                    //Show image in textpane
-                    text.setText("");
-                    StyledDocument doc = (StyledDocument) text.getDocument();
-                    Style style = doc.addStyle("Image", null);
-                    StyleConstants.setIcon(style, new ImageIcon(img));
+                    if ( img != null ) {
+                        //Show image in textpane
+                        StyledDocument doc = (StyledDocument) text.getDocument();
+                        Style style = doc.addStyle("Image", null);
+                        StyleConstants.setIcon(style, new ImageIcon(img));
 
+                        try {
+                            doc.insertString(doc.getLength(), "ignored text", style);
+                            JButton saveImage = new JButton("Save Image");
+                            final BufferedImage saveImg = img;
+                            saveImage.addActionListener(new ActionListener() {
 
-                    try {
-                        doc.insertString(doc.getLength(), "ignored text", style);
-                        JButton saveImage = new JButton("Save Image");
-                        final BufferedImage saveImg = img;
-                        saveImage.addActionListener(new ActionListener() {
-                            public void actionPerformed(ActionEvent event) {
-                                try {
-                                    FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
-                                    fileDialog.setFilenameFilter(new FilenameFilter() {
-                                        public boolean accept(File dir, String name) {
-                                            return name.endsWith(".jpg");
-                                        }
-                                    });
-                                    fileDialog.setFile("Untitled.jpg");
-                                    fileDialog.setVisible(true);
-                                    ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
+                                public void actionPerformed(ActionEvent event) {
+                                    try {
+                                        FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
+                                        fileDialog.setFilenameFilter(new FilenameFilter() {
 
-                                    //JOptionPane.showMessageDialog(text, "Image has been saved in c:\\\\");
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                                            public boolean accept(File dir, String name) {
+                                                return name.endsWith(".jpg");
+                                            }
+                                        });
+                                        fileDialog.setFile("Untitled.jpg");
+                                        fileDialog.setVisible(true);
+                                        ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
 
+                                    }
                                 }
-                            }
-                        });
-                        text.append("\n", null);
-                        text.insertComponent(saveImage);
-                    } catch (BadLocationException e) {
-                        e.printStackTrace();
+                            });
+                            text.append("\n", null);
+                            text.insertComponent(saveImage);
+                        } catch (BadLocationException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        text.setText("Image can't be loaded.");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
             } else if ( stream.get(PdfName.LENGTH1) != null ) {
                 try {
                     byte[] bytes = PdfReader.getStreamBytesRaw(stream);
