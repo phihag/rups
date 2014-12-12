@@ -20,15 +20,12 @@
 
 package com.itextpdf.rups;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.io.File;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.text.Version;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
 
 /**
  * iText RUPS is a tool that allows you to inspect the internal structure
@@ -42,18 +39,17 @@ public class Rups {
 	 * @param	args	no arguments needed
 	 */
 	public static void main(String[] args) {
-		f = null;
+		final File f;
 		if (args.length > 0) {
-			String pathToFile = args[0];
-			f = new File(pathToFile);
-			if (!f.canRead()) {
-				f = null;
-			}
-		}
+            String pathToFile = args[0];
+            f = new File(pathToFile);
+        } else {
+            f = null;
+        }
 		SwingUtilities.invokeLater(
 		        new Runnable(){
 		            public void run() {
-		                startApplication(f);
+		                startApplication(f, WindowConstants.DISPOSE_ON_CLOSE);
 		            }
 		        }
 		        );
@@ -65,7 +61,7 @@ public class Rups {
      * Initializes the main components of the Rups application.
      * @param f a file that should be opened on launch
      */
-    public static void startApplication(File f) {
+    public static void startApplication(File f, final int onCloseOperation) {
     	// creates a JFrame
     	JFrame frame = new JFrame();
         // defines the size and location
@@ -75,18 +71,15 @@ public class Rups {
         frame.setResizable(true);
         // title bar
         frame.setTitle("iText RUPS " + Version.getInstance().getVersion());
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(onCloseOperation);
         // the content
         RupsController controller = new RupsController(frame.getSize());
         frame.setJMenuBar(controller.getMenuBar());
         frame.getContentPane().add(controller.getMasterComponent(), java.awt.BorderLayout.CENTER);
 		frame.setVisible(true);
-		if (null != f) {
+		if (null != f && f.canRead()) {
 			controller.loadFile(f);
 		}
     }
-    
-	// other member variables
-	private static File f;
 
 }
