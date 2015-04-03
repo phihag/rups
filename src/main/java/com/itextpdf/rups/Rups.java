@@ -33,6 +33,11 @@ import java.io.File;
  */
 public class Rups {
 
+    /**
+     * Allows people to plug in RUPS into their projects without RUPS shutting down the JVM.
+      */
+    public static int CLOSE_OPERATION = WindowConstants.EXIT_ON_CLOSE;
+
 	// main method
 	/**
 	 * Main method. Starts the RUPS application.
@@ -49,7 +54,7 @@ public class Rups {
 		SwingUtilities.invokeLater(
 		        new Runnable(){
 		            public void run() {
-		                startApplication(f, WindowConstants.EXIT_ON_CLOSE);
+		                startApplication(f, CLOSE_OPERATION);
 		            }
 		        }
 		        );
