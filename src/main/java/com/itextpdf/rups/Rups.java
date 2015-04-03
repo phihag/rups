@@ -49,7 +49,7 @@ public class Rups {
 		SwingUtilities.invokeLater(
 		        new Runnable(){
 		            public void run() {
-		                startApplication(f, WindowConstants.DISPOSE_ON_CLOSE);
+		                startApplication(f, WindowConstants.EXIT_ON_CLOSE);
 		            }
 		        }
 		        );
